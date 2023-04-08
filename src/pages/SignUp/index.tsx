@@ -1,3 +1,5 @@
+//Aqui está nossa tela de cadastro
+
 import { FormEvent, useContext, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,9 +21,9 @@ export function SignUp(){
         e.preventDefault(); //Evita que a página seja renderizada
 
         if(nome !== "" && email !== "" && password !== ""){
-            signUp(email, password, nome);
+            signUp(email, password, nome); //Nossos dados estão sendo enviados para nosso context api
             toast.success("Conta criada com sucesso")
-            navigate("/dashboard");
+            navigate("/");
         } else {
             toast.error("Necessário preencher os campos");
         }

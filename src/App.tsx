@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 
 import RoutesIndex from "./routes";
 
+//O AuthProvider é nosso Context API e por isso deve envolver todo nosso projeto.
 function App() {
   return (
     <AuthProvider>

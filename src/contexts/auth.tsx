@@ -1,9 +1,13 @@
+//Aqui fica nosso context API
+
 import { useState, createContext, useEffect } from "react";
 import { compare, hash } from "bcryptjs"; //biblioteca para importar criptografia
 
 export const AuthContext = createContext({});
 
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
 
 interface User {
     id: string;
@@ -14,8 +18,8 @@ interface User {
 function AuthProvider({children}: any) {
 
     const [user, setUser] = useState<User | null>(null);
-    const [loadingAth, setLoadingAuth] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loadingAuth, setLoadingAuth] = useState(false); //Processo de carregamento
+    const [loading, setLoading] = useState(true); //Caso eleclique no botão de carregamento
 
     //Serve pra quando a aplicação abrir, verificar se já existe algum usuário logado
     //Se existir, já será inserido dentro da STATE USER os dados, 
