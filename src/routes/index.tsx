@@ -12,15 +12,16 @@ import Profile from "../pages/Profile";
 
 //Private Route
 import PrivateRoute from "./privateRoute";
+import Customers from "../pages/Customers";
 
 export default function RoutesIndex(){
     return(
         <Fragment>
             <Routes>
-            <Route path="/dashboard" element={<Dashboard/>}/>
-            <Route path="/profile" element={<Profile/>}/>
                 <Route element={<PrivateRoute/>}>
-
+                    <Route path="/dashboard" element={<Dashboard/>}/>
+                    <Route path="/profile" element={<Profile/>}/>
+                    <Route path="/Customers" element={<Customers/>}/>
                 </Route>
                 <Route path="/" element={<SignIn/>}/>
                 <Route path="/register" element={<SignUp />}/>
