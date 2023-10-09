@@ -1,21 +1,12 @@
-import{BrowserRouter as Router} from "react-router-dom";
-import AuthProvider from './contexts/auth';
+import { BrowserRouter } from "react-router-dom";
+import Routes from "./routes";
+import Navbar from "./components/Navbar";
 
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from "react-toastify";
-
-import RoutesIndex from "./routes";
-
-//O AuthProvider é nosso Context API e por isso deve envolver todo nosso projeto.
-function App() {
+export default function App() {
   return (
-    <AuthProvider>
-      <ToastContainer/>
-      <Router>
-        <RoutesIndex/>
-      </Router>
-    </AuthProvider>
+    <BrowserRouter>
+      <Navbar />
+      <Routes />
+    </BrowserRouter>
   );
 }
-
-export default App
