@@ -43,7 +43,7 @@ export default function MostrarPostagem() {
         />
         <div className="row">
           <div className="col-8">
-            <form action="">
+            <form autoComplete="off">
               <div>
                 <label htmlFor="conteudo" className="form-label fs-3 fw-bold">
                   Comentários

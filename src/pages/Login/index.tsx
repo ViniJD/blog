@@ -6,14 +6,14 @@ export default function Login() {
       <div className="container">
         <div className="row d-flex justify-content-center">
           <div className="col-6">
-            <h1 className="fw-bold mb-3 text-center">
-              <Link to="/" className="text-dark text-decoration-none">
+            <h1 className="fw-bold display-4 mb-3 text-center">
+              <Link to="/" className="text-warning text-decoration-none">
                 News.blog
               </Link>
             </h1>
             <div className="card bg-body-tertiary">
               <div className="card-body p-5">
-                <form className="mb-3">
+                <form className="mb-3" autoComplete="off">
                   <p className="mb-3">
                     Por favor, entre com seu login e sua senha!
                   </p>

@@ -6,14 +6,14 @@ export default function Cadastrar() {
       <div className="container">
         <div className="row d-flex justify-content-center">
           <div className="col-6">
-            <h1 className="fw-bold mb-3 text-center">
-              <Link to="/" className="text-dark text-decoration-none">
+            <h1 className="fw-bold display-4 mb-3 text-center">
+              <Link to="/" className="text-warning text-decoration-none">
                 News.blog
               </Link>
             </h1>
             <div className="card bg-body-tertiary">
               <div className="card-body p-5">
-                <form className="mb-3">
+                <form className="mb-3" autoComplete="off">
                   <p className="mb-3">
                     Bem vindo! Entre com seus dados para se cadastrar.
                   </p>
@@ -61,6 +61,7 @@ export default function Cadastrar() {
                             value="LEI"
                             name="nivel"
                             id="leitor"
+                            checked
                           />
                           <label className="form-check-label" htmlFor="leitor">
                             Leitor
