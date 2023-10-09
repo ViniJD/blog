@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 import Cadastrar from "../pages/Cadastrar";
 import Home from "../pages/Home";
@@ -10,12 +10,27 @@ import Postagens from "../pages/Postagens";
 import MostrarPostagem from "../pages/MostrarPostagem";
 import PostagensDoUsuarios from "../pages/PostagensDoUsuario";
 import Sobre from "../pages/Sobre";
+import { useEffect } from "react";
+import Sidebar from "../components/Sidebar";
 
 export default function RoutesIndex() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location]);
+
   return (
     <Routes>
       <Route element={<PrivateRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <Sidebar>
+              <h1>teste</h1>
+            </Sidebar>
+          }
+        />
       </Route>
       <Route path="/" element={<Home />} />
       <Route path="/postagens" element={<Postagens />} />

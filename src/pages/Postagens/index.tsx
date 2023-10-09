@@ -1,4 +1,4 @@
-import CardPostagem from "../../CardPostagem";
+import CardPostagem from "../../components/CardPostagem";
 
 export default function Postagens() {
   return (
