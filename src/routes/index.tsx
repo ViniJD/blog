@@ -8,6 +8,8 @@ import Dashboard from "../pages/Dashboard";
 import PrivateRoute from "./privateRoute";
 import Postagens from "../pages/Postagens";
 import MostrarPostagem from "../pages/MostrarPostagem";
+import PostagensDoUsuarios from "../pages/PostagensDoUsuario";
+import Sobre from "../pages/Sobre";
 
 export default function RoutesIndex() {
   return (
@@ -18,6 +20,8 @@ export default function RoutesIndex() {
       <Route path="/" element={<Home />} />
       <Route path="/postagens" element={<Postagens />} />
       <Route path="/postagens/:id" element={<MostrarPostagem />} />
+      <Route path="/postagens/usuario/:id" element={<PostagensDoUsuarios />} />
+      <Route path="/sobre" element={<Sobre />} />
       <Route path="/login" element={<Login />} />
       <Route path="/cadastrar" element={<Cadastrar />} />
     </Routes>

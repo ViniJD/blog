@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import CardPostagem from "../../CardPostagem";
 
 export default function Home() {
   return (
@@ -20,41 +21,26 @@ export default function Home() {
         </div>
 
         <div className="row align-items-md-stretch">
-          <div className="col-md-6">
+          <div className="col-6">
             <div className="h-100 p-5 text-bg-dark rounded-3">
               <h2>Sobre nós</h2>
               <p>
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Itaque
-                atque cumque eaque asperiores rerum beatae omnis tenetur
-                perspiciatis, error assumenda corporis odit excepturi.
+                Explore uma vasta gama de tópicos interessantes e informativos
+                em nosso blog. Aqui, você encontrará artigos envolventes que
+                cobrem tecnologia, ciência, cultura, viagens, dicas de estilo de
+                vida e muito mais. Nossa missão é fornecer conteúdo cativante
+                que inspire a curiosidade e o aprendizado. Dê uma olhada e
+                mergulhe em um mundo de conhecimento diversificado.
               </p>
               <Link className="btn btn-outline-light" to="/sobre">
                 Veja mais
               </Link>
             </div>
           </div>
-          <div className="col-md-6">
+          <div className="col-6">
             <div className="h-100 p-5 bg-body-tertiary border rounded-3">
               <h2>Última postagem</h2>
-              <div className="card">
-                <img
-                  src="https://i.pinimg.com/originals/a1/a2/87/a1a2877a97033a48df935d3a3a5bd347.jpg"
-                  className="card-img-top"
-                  alt="Imagem do post"
-                />
-                <div className="card-body">
-                  <h5 className="card-title">Post Title</h5>
-                  <p className="card-text">
-                    Some quick example text to build on the card title and make
-                    up the bulk of the card's content.
-                  </p>
-                  <p className="text-end">
-                    <Link className="btn btn-warning ms-auto" to="/postagens/1">
-                      Ver postagem
-                    </Link>
-                  </p>
-                </div>
-              </div>
+              <CardPostagem />
             </div>
           </div>
         </div>

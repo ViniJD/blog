@@ -1,12 +1,12 @@
 import CardPostagem from "../../CardPostagem";
 
-export default function Postagens() {
+export default function PostagensDoUsuarios() {
   return (
     <main>
       <div className="container mt-5">
-        <h1 className="display-5 fw-bold mb-5">Todas as postagens</h1>
+        <h1 className="display-5 fw-bold mb-5">Postagens do Otávio</h1>
         <div className="row">
-          {Array.from(Array(10).keys()).map((id) => (
+          {Array.from(Array(5).keys()).map((id) => (
             <div className="col-4 mb-4">
               <CardPostagem />
             </div>

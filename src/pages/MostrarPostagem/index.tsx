@@ -18,7 +18,7 @@ export default function MostrarPostagem() {
         }}
       />
       <div className="container mt-5">
-        <h1>Title Post</h1>
+        <h1 className="display-5 fw-bold">Title Post</h1>
         <p>
           Escritor por{" "}
           <Link to="/postagens/usuario/1" className="text-dark fw-bold">
@@ -26,6 +26,7 @@ export default function MostrarPostagem() {
           </Link>
         </p>
         <p
+          className="fs-4"
           dangerouslySetInnerHTML={{
             __html: `Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aut
           repellendus dolores reprehenderit facilis maxime aperiam a, at
