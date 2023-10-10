@@ -1,5 +1,6 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { IRoute } from "../../interfaces/IRoutes";
 
 interface IProps {
   children: React.ReactNode;
@@ -9,6 +10,33 @@ export default function Sidebar({ children }: IProps) {
   const [routesToHideMenu] = useState<string[]>(["/dashboard"]);
   const [activeRoute, setActiveRoute] = useState<string>("");
   const location = useLocation();
+  const [routes] = useState<IRoute[]>([
+    {
+      label: "Minhas postagens",
+      route: "/dashboard/postagens",
+      role: ["ADM", "ESC"],
+    },
+    {
+      label: "Nova postagem",
+      route: "/dashboard/postagens/nova",
+      role: ["ADM", "ESC"],
+    },
+    {
+      label: "Meus cometários",
+      route: "/dashboard/meuscomentarios",
+      role: ["ADM", "ESC", "LEI"],
+    },
+    {
+      label: "Postagens curtidas",
+      route: "/dashboard/postagenscurtidas",
+      role: ["ADM", "ESC", "LEI"],
+    },
+    {
+      label: "Meus dados",
+      route: "/dashboard/meusdados",
+      role: ["ADM", "ESC", "LEI"],
+    },
+  ]);
 
   useEffect(() => {
     setActiveRoute(location.pathname);
@@ -34,22 +62,19 @@ export default function Sidebar({ children }: IProps) {
               </Link>
             </div>
             <ul className="nav nav-pills flex-column h-100">
-              <li className="nav-item">
-                <Link to="#" className="nav-link link-body-emphasis fw-bold">
-                  Minhas postagens
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="#" className="nav-link link-body-emphasis">
-                  Nova postagem
-                </Link>
-              </li>
-              <li>
-                <Link to="#" className="nav-link link-body-emphasis">
-                  Meus dados
-                </Link>
-              </li>
-              <li className="mt-auto border-top pt-2">
+              {routes.map(({ route, label }, index) => (
+                <li className="nav-item" key={index}>
+                  <Link
+                    className={`nav-link link-body-emphasis ${
+                      activeRoute === route && "fw-bold"
+                    }`}
+                    to={route}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+              <li className="mt-auto pt-2">
                 <button className="nav-link link-body-emphasis">
                   <i className="fa-solid fa-right-from-bracket me-2"></i> Sair
                 </button>

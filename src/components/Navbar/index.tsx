@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-
-interface IRoute {
-  label: string;
-  route: string;
-}
+import { IRoute } from "../../interfaces/IRoutes";
 
 export default function Navbar() {
   const [routesToHideMenu] = useState<string[]>([
