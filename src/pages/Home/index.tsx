@@ -40,7 +40,7 @@ export default function Home() {
           <div className="col-6">
             <div className="h-100 p-5 bg-body-tertiary border rounded-3">
               <h2>Última postagem</h2>
-              <CardPostagem />
+              {/* <CardPostagem /> */}
             </div>
           </div>
         </div>

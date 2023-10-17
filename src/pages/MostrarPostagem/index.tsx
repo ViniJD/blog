@@ -20,7 +20,7 @@ export default function MostrarPostagem() {
       <div className="container mt-5">
         <h1 className="display-5 fw-bold">Title Post</h1>
         <p>
-          Escritor por{" "}
+          escrito por{" "}
           <Link to="/postagens/usuario/1" className="text-dark fw-bold">
             Otávio
           </Link>

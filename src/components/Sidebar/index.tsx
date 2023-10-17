@@ -1,6 +1,8 @@
-import React, { ReactNode, useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IRoute } from "../../interfaces/IRoutes";
+import { IUsuario } from "../../interfaces/IUsuario";
+import { getItem, removeItem } from "../../services/localStorageService";
 
 interface IProps {
   children: React.ReactNode;
@@ -10,6 +12,7 @@ export default function Sidebar({ children }: IProps) {
   const [routesToHideMenu] = useState<string[]>(["/dashboard"]);
   const [activeRoute, setActiveRoute] = useState<string>("");
   const location = useLocation();
+  const navigate = useNavigate();
   const [routes] = useState<IRoute[]>([
     {
       label: "Minhas postagens",
@@ -41,6 +44,11 @@ export default function Sidebar({ children }: IProps) {
   useEffect(() => {
     setActiveRoute(location.pathname);
   }, [location]);
+
+  const signout = useCallback(() => {
+    removeItem("loggedUser");
+    navigate("/");
+  }, []);
 
   return (
     <div
@@ -75,7 +83,10 @@ export default function Sidebar({ children }: IProps) {
                 </li>
               ))}
               <li className="mt-auto pt-2">
-                <button className="nav-link link-body-emphasis">
+                <button
+                  onClick={signout}
+                  className="nav-link link-body-emphasis"
+                >
                   <i className="fa-solid fa-right-from-bracket me-2"></i> Sair
                 </button>
               </li>
