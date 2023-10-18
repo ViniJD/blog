@@ -43,8 +43,8 @@ const register = async (
   }
 };
 
-const getUserById = async (id: number): Promise<IUsuario> => {
-  const { data } = await api.get<IUsuario>(`/usuarios/${id}`);
+const getUserById = async (ids: number[]): Promise<IUsuario[]> => {
+  const { data } = await api.get<IUsuario[]>(`/usuarios?ids=${ids.join(",")}`);
   return data;
 };
 

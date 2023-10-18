@@ -1,13 +1,34 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CardPostagem from "../../components/CardPostagem";
+import { IPostagem } from "../../interfaces/IPostagem";
+import { getPosts } from "../../services/postagemService";
+import { getUserById } from "../../services/usuarioService";
 
 export default function Home() {
+  const [lastPost, setLastPost] = useState<IPostagem>({} as IPostagem);
+
+  const getLastPostAndAuthor = async () => {
+    const [post] = await getPosts(true);
+
+    const id = post.idUsuarioFk;
+    const [users] = await getUserById([id]);
+
+    post.escritor = users;
+
+    setLastPost(post);
+  };
+
+  useEffect(() => {
+    getLastPostAndAuthor();
+  }, []);
+
   return (
     <main>
       <div className="container mt-5">
         <div className="p-5 mb-4 bg-body-tertiary border rounded-3">
           <div className="container-fluid py-5">
-            <h1 className="display-5 fw-bold">News.blog</h1>
+            <h1 className="display-5 fw-bold text-warning">News.blog</h1>
             <p className="fs-4">
               Neste blog você vai encontrar postagens dos mais diversos temas
               para você se atualizar, curtir e comentar. Aqui também você pode
@@ -40,7 +61,7 @@ export default function Home() {
           <div className="col-6">
             <div className="h-100 p-5 bg-body-tertiary border rounded-3">
               <h2>Última postagem</h2>
-              {/* <CardPostagem /> */}
+              {lastPost && <CardPostagem post={lastPost} />}
             </div>
           </div>
         </div>

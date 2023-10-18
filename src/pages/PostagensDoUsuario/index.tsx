@@ -1,14 +1,37 @@
+import { useLocation, useParams } from "react-router-dom";
 import CardPostagem from "../../components/CardPostagem";
+import { useEffect, useState } from "react";
+import { IPostagem } from "../../interfaces/IPostagem";
+import { getPostsByAuthorId } from "../../services/postagemService";
+import { getUserById } from "../../services/usuarioService";
+import { IUsuario } from "../../interfaces/IUsuario";
 
 export default function PostagensDoUsuarios() {
+  const [posts, setPosts] = useState<IPostagem[]>([]);
+  const [author, setAuthor] = useState<IUsuario>({} as IUsuario);
+  const { id } = useParams();
+  const location = useLocation();
+
+  const getPostsByAuthor = async () => {
+    const posts = await getPostsByAuthorId(Number(id));
+    const [user] = await getUserById([Number(id)]);
+    setAuthor(user);
+    posts.forEach((post) => (post.escritor = user));
+    setPosts(posts);
+  };
+
+  useEffect(() => {
+    getPostsByAuthor();
+  }, [location]);
+
   return (
     <main>
       <div className="container mt-5">
-        <h1 className="display-5 fw-bold mb-5">Postagens do Otávio</h1>
+        <h1 className="display-5 fw-bold mb-5">Postagens do {author.nome}</h1>
         <div className="row">
-          {Array.from(Array(5).keys()).map((id) => (
-            <div className="col-4 mb-4">
-              <CardPostagem />
+          {posts.map((post) => (
+            <div className="col-4 mb-4" key={post.id}>
+              <CardPostagem post={post} />
             </div>
           ))}
         </div>

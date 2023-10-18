@@ -31,6 +31,7 @@ export default function Navbar() {
   const signout = useCallback(() => {
     removeItem("loggedUser");
     setLoggedUser(undefined);
+    window.location.reload();
   }, [loggedUser]);
 
   useEffect(() => {

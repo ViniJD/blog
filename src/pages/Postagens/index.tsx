@@ -8,28 +8,24 @@ import { IUsuario } from "../../interfaces/IUsuario";
 export default function Postagens() {
   const [posts, setPosts] = useState<IPostagem[]>([]);
 
-  const getPostsAndWriters = async () => {
+  const getPostsAndAuthors = async () => {
     const posts = await getPosts();
-    setPosts(posts);
 
-    let usersId = posts.map((post) => post.idUsuarioFk);
-    usersId = usersId.filter((item, index) => usersId.indexOf(item) === index);
-    // getUsersByIdAndSetInPost(usersId);
-  };
+    let ids = posts.map((post) => post.idUsuarioFk);
+    ids = ids.filter((item, index) => ids.indexOf(item) === index);
+    const users: IUsuario[] = await getUserById(ids);
 
-  const getUsersByIdAndSetInPost = async (ids: number[]) => {
-    let users: IUsuario[] = [];
-
-    ids.forEach(async (id) => {
-      const user = await getUserById(id);
-      users.push(user);
+    const postsWithAuthors = posts.map((post) => {
+      const user = users.find((user) => user.id === post.idUsuarioFk);
+      post.escritor = user;
+      return post;
     });
 
-    console.log(users);
+    setPosts(postsWithAuthors);
   };
 
   useEffect(() => {
-    getPostsAndWriters();
+    getPostsAndAuthors();
   }, []);
 
   return (

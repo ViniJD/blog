@@ -2,7 +2,9 @@ export default function Sobre() {
   return (
     <main>
       <div className="container mt-5">
-        <h1 className="display-5 fw-bold mb-5">Sobre a News.blog</h1>
+        <h1 className="display-5 fw-bold mb-5">
+          Sobre a <span className="text-warning">News.blog</span>
+        </h1>
         <p className="fs-4">
           Somos um grupo apaixonado por compartilhar conhecimento e inspiração.
           Nosso blog é o resultado de anos de paixão por explorar o mundo e

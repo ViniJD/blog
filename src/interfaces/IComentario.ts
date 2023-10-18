@@ -1,6 +1,6 @@
 import { IUsuario } from "./IUsuario";
 
-export interface IComentarios {
+export interface IComentario {
   id: number;
   conteudo: string;
   idUsuarioFk: number;

@@ -1,4 +1,4 @@
-import { IComentarios } from "./IComentario";
+import { IComentario } from "./IComentario";
 import { ICurtida } from "./ICurtida";
 import { IUsuario } from "./IUsuario";
 
@@ -11,6 +11,6 @@ export interface IPostagem {
   idUsuarioFk: number;
 
   escritor?: IUsuario;
-  comentarios?: IComentarios[];
+  comentarios?: IComentario[];
   curtidas?: ICurtida[];
 }
