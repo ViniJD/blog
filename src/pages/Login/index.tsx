@@ -33,13 +33,8 @@ export default function Login() {
     const value = event.target.value;
     let auxValues: IFormValues;
 
-    if (requiredValidator(value, name)) {
-      auxValues = handleSetError(
-        values,
-        name,
-        true,
-        requiredValidator(value, name)
-      );
+    if (requiredValidator(value)) {
+      auxValues = handleSetError(values, name, true, requiredValidator(value));
     } else {
       auxValues = handleSetError(values, name, false, "");
     }

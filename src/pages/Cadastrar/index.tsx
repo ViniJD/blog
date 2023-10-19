@@ -27,8 +27,6 @@ export default function Cadastrar() {
   const navigate = useNavigate();
 
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(values, e.target.name, e.target.value);
-
     const auxValues = changeValue(values, e.target.name, e.target.value);
     setValues(auxValues);
   };
@@ -41,13 +39,8 @@ export default function Cadastrar() {
     const value = event.target.value;
     let auxValues: IFormValues;
 
-    if (requiredValidator(value, name)) {
-      auxValues = handleSetError(
-        values,
-        name,
-        true,
-        requiredValidator(value, name)
-      );
+    if (requiredValidator(value)) {
+      auxValues = handleSetError(values, name, true, requiredValidator(value));
     } else {
       auxValues = handleSetError(values, name, false, "");
     }

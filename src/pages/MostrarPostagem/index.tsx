@@ -1,19 +1,38 @@
+import iziToast from "izitoast";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, json, useLocation, useParams } from "react-router-dom";
+import {
+  handleChangeValue as changeValue,
+  handleSetError,
+  verifyIfHasError,
+} from "../../hooks/useForm";
+import { IForm, IFormValues } from "../../interfaces/IFormControl";
 import { IPostagem } from "../../interfaces/IPostagem";
+import { IUsuario } from "../../interfaces/IUsuario";
+import {
+  createComment,
+  deleteComment,
+  getCommentsByPostId,
+} from "../../services/comentarioService";
+import { getLikesByPostId } from "../../services/curtidaService";
+import { getItem } from "../../services/localStorageService";
 import { getPostById } from "../../services/postagemService";
 import { getUserById } from "../../services/usuarioService";
-import { IUsuario } from "../../interfaces/IUsuario";
-import { getItem } from "../../services/localStorageService";
-import iziToast from "izitoast";
-import { getLikesByPostId } from "../../services/curtidaService";
-import { getCommentsByPostId } from "../../services/comentarioService";
+import {
+  maxLengthValidator,
+  requiredValidator,
+} from "../../services/validators";
 
 export default function MostrarPostagem() {
+  const [disableButton, setDisableButton] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [post, setPost] = useState<IPostagem>({} as IPostagem);
   const [loggedUser, setLoggedUser] = useState<IUsuario>();
   const { id } = useParams();
   const location = useLocation();
+  const [values, setValues] = useState<IFormValues>({
+    conteudo: {} as IForm,
+  });
 
   const getPostsByAuthor = async () => {
     const postById = await getPostById(Number(id));
@@ -40,8 +59,115 @@ export default function MostrarPostagem() {
     setPost(postById);
   };
 
+  const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const auxValues = changeValue(values, e.target.name, e.target.value);
+    setValues(auxValues);
+  };
+
+  const handleVerifyIfHasError = (
+    event: React.FocusEvent<HTMLInputElement>
+  ) => {
+    event.preventDefault();
+    const name = event.target.name;
+    const value = event.target.value;
+    let auxValues: IFormValues;
+
+    if (requiredValidator(value)) {
+      auxValues = handleSetError(values, name, true, requiredValidator(value));
+    } else if (maxLengthValidator(value, 250)) {
+      auxValues = handleSetError(
+        values,
+        name,
+        true,
+        maxLengthValidator(value, 250)
+      );
+    } else {
+      auxValues = handleSetError(values, name, false, "");
+    }
+
+    setValues(auxValues);
+    setDisableButton(verifyIfHasError(values));
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    if (!loggedUser) return;
+    setLoading(true);
+    e.preventDefault();
+
+    const comment = await createComment(
+      values.conteudo.value,
+      loggedUser.id,
+      post.id
+    );
+
+    iziToast.success({
+      position: "bottomCenter",
+      message: "Comentário realizado com sucesso",
+    });
+
+    const postUpdated = post;
+    comment.usuario = loggedUser;
+    postUpdated.comentarios?.push(comment);
+
+    const valuesUpdated = values;
+    values.conteudo = {
+      value: "",
+      errorMessage: "",
+      hasError: false,
+    };
+
+    setValues(valuesUpdated);
+    setPost(postUpdated);
+    setDisableButton(true);
+    setLoading(false);
+  };
+
+  const handleDeleteComment = async (id: number) => {
+    if (!loggedUser) return;
+
+    iziToast.question({
+      timeout: 10000,
+      close: true,
+      overlay: true,
+      zindex: 999,
+      message: "Deseja realmente excluir esse comentário?",
+      position: "center",
+      buttons: [
+        [
+          "<button><b>Não</b></button>",
+          (instance, toast) => {
+            instance.hide({ transitionOut: "fadeOut" }, toast, "button");
+          },
+          true,
+        ],
+        [
+          "<button>Sim</button>",
+          async (instance, toast) => {
+            instance.hide({ transitionOut: "fadeOut" }, toast, "button");
+            const success = await deleteComment(id);
+
+            if (success) {
+              getPostsByAuthor();
+
+              iziToast.success({
+                position: "bottomCenter",
+                message: "Comentário excluído com sucesso",
+              });
+            } else {
+              iziToast.error({
+                position: "bottomCenter",
+                message: "Erro ao excluir comentário",
+              });
+            }
+          },
+          false,
+        ],
+      ],
+    });
+  };
+
   const showUnloggedAlert = () => {
-    iziToast.error({
+    iziToast.warning({
       position: "bottomCenter",
       message: `Você precisa estar logado para curtir ou comentar`,
     });
@@ -94,49 +220,95 @@ export default function MostrarPostagem() {
               ></div>
             )}
 
-            <form autoComplete="off">
+            <form autoComplete="off" onSubmit={handleSubmit}>
               <label htmlFor="conteudo" className="form-label fs-3 fw-bold">
                 Comentários
               </label>
               <textarea
-                className="form-control"
+                className={`form-control ${
+                  values.conteudo.hasError ? "is-invalid" : ""
+                }`}
                 placeholder="Digite seu comentário"
                 id="conteudo"
+                name="conteudo"
                 rows={3}
-                maxLength={250}
                 disabled={!loggedUser && true}
-              ></textarea>
-              <div className="form-text">0 caracteres de 250.</div>
+                value={values.conteudo ? values.conteudo.value : ""}
+                onChange={handleChangeValue}
+                onBlur={handleVerifyIfHasError}
+              />
+              {values.conteudo.hasError && (
+                <div className="invalid-feedback">
+                  {values.conteudo.errorMessage}
+                </div>
+              )}
+              <div className="form-text">
+                {values.conteudo && values.conteudo.value
+                  ? values.conteudo.value.length
+                  : "0"}{" "}
+                caracteres de 250.
+              </div>
+
               <div className="text-end">
-                <button
-                  type="submit"
-                  className="btn btn-warning mb-3"
-                  disabled={!loggedUser && true}
-                >
-                  Enviar
-                </button>
+                {!loading ? (
+                  <button
+                    type="submit"
+                    className="btn btn-warning mb-3"
+                    disabled={(!loggedUser && true) || disableButton}
+                  >
+                    Enviar
+                  </button>
+                ) : (
+                  <button className="btn btn-warning" type="button" disabled>
+                    <span className="spinner-border text-dark spinner-border-sm"></span>
+                  </button>
+                )}
               </div>
             </form>
 
             {post.comentarios?.map((comentario, idx) => (
-              <p className="col-10 offset-1" key={comentario.id}>
-                <strong className="me-1">{comentario.usuario?.nome}</strong>
-                {comentario.conteudo}
-                {post.comentarios && post.comentarios?.length < idx + 1 ? (
-                  <hr />
-                ) : (
-                  <></>
-                )}
-              </p>
+              <div key={comentario.id}>
+                <div className="col-10 offset-1 d-flex justify-content-between align-items-center">
+                  <span
+                    className={
+                      loggedUser && loggedUser?.id === comentario.idUsuarioFk
+                        ? "me-4"
+                        : ""
+                    }
+                  >
+                    <strong className="me-1">{comentario.usuario?.nome}</strong>
+                    {comentario.conteudo}
+                  </span>
+                  {loggedUser && loggedUser?.id === comentario.idUsuarioFk && (
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleDeleteComment(comentario.id)}
+                    >
+                      <i className="fa-regular fa-trash-can"></i>
+                    </span>
+                  )}
+                </div>
+                <>
+                  {post.comentarios && post.comentarios?.length > idx + 1 ? (
+                    <hr className="col-10 offset-1" />
+                  ) : (
+                    <></>
+                  )}
+                </>
+              </div>
             ))}
           </div>
           <div className="col-4 d-flex justify-content-center mt-4 pt-5">
             <span
-              className={`${!loggedUser && "opacity-75"}`}
+              className={`${!loggedUser && "opacity-75"} position-absolute`}
               style={{ cursor: "pointer" }}
             >
-              <i className="fa-regular fa-heart fa-2xl"></i>
-              {/* <i className="fa-solid fa-heart fa-2xl"></i> */}
+              {loggedUser &&
+              post.curtidas?.some((c) => c.idUsuarioFk === loggedUser.id) ? (
+                <i className="fa-solid fa-heart fa-2xl"></i>
+              ) : (
+                <i className="fa-regular fa-heart fa-2xl"></i>
+              )}
               <span className="fs-5 ms-3 user-select-none">
                 {post.curtidas?.length} curtidas
               </span>

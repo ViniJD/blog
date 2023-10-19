@@ -13,8 +13,6 @@ export default function MinhasPostagens() {
   const location = useLocation();
 
   const getPostsByAuthor = async () => {
-    console.log(loggedUser);
-
     const posts = await getPostsByAuthorId(loggedUser.id);
     const [user] = await getUserById([loggedUser.id]);
     posts.forEach((post) => (post.escritor = user));
