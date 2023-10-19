@@ -8,7 +8,7 @@ export default function PostagensCurtidas() {
       <div className="row">
         {Array.from(Array(3).keys()).map((id) => (
           <div className="col-4 mb-4" key={id}>
-            <CardPostagem />
+            {/* <CardPostagem /> */}
           </div>
         ))}
       </div>

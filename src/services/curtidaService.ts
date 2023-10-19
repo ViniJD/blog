@@ -6,15 +6,12 @@ const getLikesByPostId = async (id: number): Promise<ICurtida[]> => {
   return data;
 };
 
-const createLike = async (
-  idUser: number,
-  idPost: number
-): Promise<ICurtida> => {
-  const { data } = await api.post<ICurtida>(`/curtidas`, {
+const createLike = async (idUser: number, idPost: number): Promise<boolean> => {
+  const { status } = await api.post<ICurtida>(`/curtidas`, {
     idPostagemFk: idPost,
     IdUsuarioFk: idUser,
   });
-  return data;
+  return status === 201;
 };
 
 const deleteLike = async (id: number): Promise<boolean> => {
@@ -22,4 +19,4 @@ const deleteLike = async (id: number): Promise<boolean> => {
   return status === 204;
 };
 
-export { getLikesByPostId, createLike };
+export { getLikesByPostId, createLike, deleteLike };

@@ -11,12 +11,14 @@ export default function Home() {
   const getLastPostAndAuthor = async () => {
     const [post] = await getPosts(true);
 
-    const id = post.idUsuarioFk;
-    const [users] = await getUserById([id]);
+    if (post.id) {
+      const id = post.idUsuarioFk;
+      const [users] = await getUserById([id]);
 
-    post.escritor = users;
+      post.escritor = users;
 
-    setLastPost(post);
+      setLastPost(post);
+    }
   };
 
   useEffect(() => {
@@ -61,7 +63,15 @@ export default function Home() {
           <div className="col-6">
             <div className="h-100 p-5 bg-body-tertiary border rounded-3">
               <h2>Última postagem</h2>
-              {lastPost && <CardPostagem post={lastPost} />}
+              {lastPost.id ? (
+                <CardPostagem post={lastPost} />
+              ) : (
+                <div className="card">
+                  <div className="card-body">
+                    Nenhuma postagem foi cadastrada ainda
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

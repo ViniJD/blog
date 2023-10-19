@@ -1,6 +1,6 @@
 import iziToast from "izitoast";
 import { useEffect, useState } from "react";
-import { Link, json, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import {
   handleChangeValue as changeValue,
   handleSetError,
@@ -14,7 +14,11 @@ import {
   deleteComment,
   getCommentsByPostId,
 } from "../../services/comentarioService";
-import { getLikesByPostId } from "../../services/curtidaService";
+import {
+  createLike,
+  deleteLike,
+  getLikesByPostId,
+} from "../../services/curtidaService";
 import { getItem } from "../../services/localStorageService";
 import { getPostById } from "../../services/postagemService";
 import { getUserById } from "../../services/usuarioService";
@@ -25,8 +29,13 @@ import {
 
 export default function MostrarPostagem() {
   const [disableButton, setDisableButton] = useState<boolean>(true);
+  const [showLike, setShowLike] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [post, setPost] = useState<IPostagem>({} as IPostagem);
+  const [post, setPost] = useState<IPostagem>({
+    curtidas: [],
+    comentarios: [],
+    ...({} as IPostagem),
+  });
   const [loggedUser, setLoggedUser] = useState<IUsuario>();
   const { id } = useParams();
   const location = useLocation();
@@ -34,7 +43,7 @@ export default function MostrarPostagem() {
     conteudo: {} as IForm,
   });
 
-  const getPostsByAuthor = async () => {
+  const getPostByAuthor = async () => {
     const postById = await getPostById(Number(id));
     const likes = await getLikesByPostId(postById.id);
     const comments = await getCommentsByPostId(postById.id);
@@ -59,13 +68,32 @@ export default function MostrarPostagem() {
     setPost(postById);
   };
 
-  const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const getLikes = async () => {
+    const likes = await getLikesByPostId(post.id);
+
+    const postUpdated = post;
+    postUpdated.curtidas = likes;
+    setPost(postUpdated);
+
+    if (
+      loggedUser &&
+      loggedUser.id &&
+      post.curtidas &&
+      post.curtidas.some((x) => x.idUsuarioFk === loggedUser.id)
+    ) {
+      setShowLike(true);
+    } else {
+      setShowLike(false);
+    }
+  };
+
+  const handleChangeValue = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const auxValues = changeValue(values, e.target.name, e.target.value);
     setValues(auxValues);
   };
 
   const handleVerifyIfHasError = (
-    event: React.FocusEvent<HTMLInputElement>
+    event: React.FocusEvent<HTMLTextAreaElement>
   ) => {
     event.preventDefault();
     const name = event.target.name;
@@ -147,7 +175,7 @@ export default function MostrarPostagem() {
             const success = await deleteComment(id);
 
             if (success) {
-              getPostsByAuthor();
+              getPostByAuthor();
 
               iziToast.success({
                 position: "bottomCenter",
@@ -166,6 +194,45 @@ export default function MostrarPostagem() {
     });
   };
 
+  const handleLikeOrDislike = async () => {
+    if (!loggedUser || !post.curtidas) return;
+
+    if (!showLike) {
+      const success = await createLike(loggedUser.id, post.id);
+
+      if (success) {
+        getLikes();
+
+        iziToast.success({
+          position: "bottomCenter",
+          message: "Postagem curtida",
+        });
+      } else {
+        iziToast.error({
+          position: "bottomCenter",
+          message: "Erro ao curtir postagem",
+        });
+      }
+    } else {
+      const likeId = post.curtidas.find((x) => x.idUsuarioFk === loggedUser.id);
+      const success = await deleteLike(Number(likeId?.id));
+
+      if (success) {
+        getLikes();
+
+        iziToast.success({
+          position: "bottomCenter",
+          message: "Postagem descurtida",
+        });
+      } else {
+        iziToast.error({
+          position: "bottomCenter",
+          message: "Erro ao descurtir postagem",
+        });
+      }
+    }
+  };
+
   const showUnloggedAlert = () => {
     iziToast.warning({
       position: "bottomCenter",
@@ -175,8 +242,19 @@ export default function MostrarPostagem() {
 
   useEffect(() => {
     setLoggedUser(getItem("loggedUser"));
-    getPostsByAuthor();
+    getPostByAuthor();
   }, [location]);
+
+  useEffect(() => {
+    if (
+      loggedUser &&
+      loggedUser.id &&
+      post.curtidas &&
+      post.curtidas.some((x) => x.idUsuarioFk === loggedUser.id)
+    ) {
+      setShowLike(true);
+    }
+  }, [loggedUser, post]);
 
   return (
     <main>
@@ -302,13 +380,20 @@ export default function MostrarPostagem() {
             <span
               className={`${!loggedUser && "opacity-75"} position-absolute`}
               style={{ cursor: "pointer" }}
+              onClick={handleLikeOrDislike}
             >
-              {loggedUser &&
-              post.curtidas?.some((c) => c.idUsuarioFk === loggedUser.id) ? (
-                <i className="fa-solid fa-heart fa-2xl"></i>
-              ) : (
-                <i className="fa-regular fa-heart fa-2xl"></i>
-              )}
+              <>
+                {showLike === true && (
+                  <span>
+                    <i className={`fa-solid fa-heart fa-2xl`}></i>
+                  </span>
+                )}
+                {showLike === false && (
+                  <span>
+                    <i className={`fa-regular fa-heart fa-2xl`}></i>
+                  </span>
+                )}
+              </>
               <span className="fs-5 ms-3 user-select-none">
                 {post.curtidas?.length} curtidas
               </span>

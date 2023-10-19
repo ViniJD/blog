@@ -27,13 +27,23 @@ export default function PostagensDoUsuarios() {
   return (
     <main>
       <div className="container mt-5">
-        <h1 className="display-5 fw-bold mb-5">Postagens do {author.nome}</h1>
+        <h1 className="display-5 fw-bold mb-5">
+          Postagens do(a) {author.nome}
+        </h1>
         <div className="row">
-          {posts.map((post) => (
-            <div className="col-4 mb-4" key={post.id}>
-              <CardPostagem post={post} />
+          {posts.length > 0 ? (
+            posts.map((post) => (
+              <div className="col-4 mb-4" key={post.id}>
+                <CardPostagem post={post} />
+              </div>
+            ))
+          ) : (
+            <div className="card col-4 mb-4">
+              <div className="card-body">
+                Nenhuma postagem foi cadastrada pelo(a) {author.nome}
+              </div>
             </div>
-          ))}
+          )}
         </div>
 
         <footer className="pt-3 my-4 text-body-secondary border-top">
