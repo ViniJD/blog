@@ -66,11 +66,7 @@ export default function Home() {
               {lastPost.id ? (
                 <CardPostagem post={lastPost} />
               ) : (
-                <div className="card">
-                  <div className="card-body">
-                    Nenhuma postagem foi cadastrada ainda
-                  </div>
-                </div>
+                <p>Nenhuma postagem foi cadastrada ainda</p>
               )}
             </div>
           </div>

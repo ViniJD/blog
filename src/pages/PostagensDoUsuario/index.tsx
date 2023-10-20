@@ -27,9 +27,7 @@ export default function PostagensDoUsuarios() {
   return (
     <main>
       <div className="container mt-5">
-        <h1 className="display-5 fw-bold mb-5">
-          Postagens do(a) {author.nome}
-        </h1>
+        <h1 className="display-5 fw-bold mb-5">Postagens por {author.nome}</h1>
         <div className="row">
           {posts.length > 0 ? (
             posts.map((post) => (
@@ -38,11 +36,7 @@ export default function PostagensDoUsuarios() {
               </div>
             ))
           ) : (
-            <div className="card col-4 mb-4">
-              <div className="card-body">
-                Nenhuma postagem foi cadastrada pelo(a) {author.nome}
-              </div>
-            </div>
+            <p>Nenhuma postagem foi cadastrada por {author.nome}</p>
           )}
         </div>
 

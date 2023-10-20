@@ -4,11 +4,13 @@ import { IPostagem } from "../../interfaces/IPostagem";
 interface IProps {
   post: IPostagem;
   openLinksWithTargetBlank?: boolean;
+  children?: React.ReactNode;
 }
 
 export default function CardPostagem({
   post,
   openLinksWithTargetBlank = false,
+  children,
 }: IProps) {
   return (
     <div className="card">
@@ -41,6 +43,7 @@ export default function CardPostagem({
           </Link>
         </p>
       </div>
+      {children}
     </div>
   );
 }
