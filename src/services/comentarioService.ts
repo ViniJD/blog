@@ -6,6 +6,16 @@ const getCommentsByPostId = async (id: number): Promise<IComentario[]> => {
   return data;
 };
 
+const getComments = async (): Promise<IComentario[]> => {
+  const { data } = await api.get<IComentario[]>(`/comentarios`);
+  return data;
+};
+
+const getCommentsByUserId = async (id: number): Promise<IComentario[]> => {
+  const { data } = await api.get<IComentario[]>(`/comentarios/usuario/${id}`);
+  return data;
+};
+
 const createComment = async (
   conteudo: string,
   IdUsuarioFk: number,
@@ -24,4 +34,10 @@ const deleteComment = async (id: number): Promise<boolean> => {
   return status === 204;
 };
 
-export { getCommentsByPostId, createComment, deleteComment };
+export {
+  getCommentsByPostId,
+  createComment,
+  deleteComment,
+  getComments,
+  getCommentsByUserId,
+};

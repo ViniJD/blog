@@ -56,7 +56,7 @@ export default function RoutesIndex() {
           }
         />
         <Route
-          path="/dashboard/meuscomentarios"
+          path="/dashboard/comentarios"
           element={
             <Sidebar>
               <MeusComentarios />

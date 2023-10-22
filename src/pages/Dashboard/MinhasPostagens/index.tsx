@@ -8,6 +8,7 @@ import { getItem } from "../../../services/localStorageService";
 import {
   approveOrDisapprovePost,
   deletePost,
+  getPosts,
   getPostsByAuthorId,
 } from "../../../services/postagemService";
 import { getUserById } from "../../../services/usuarioService";
@@ -18,10 +19,29 @@ export default function MinhasPostagens() {
   const location = useLocation();
 
   const getPostsByAuthor = async () => {
-    const posts = await getPostsByAuthorId(loggedUser.id, true);
-    const [user] = await getUserById([loggedUser.id]);
-    posts.forEach((post) => (post.escritor = user));
-    setPosts(posts);
+    let postsResponse: IPostagem[] = [];
+    let authors: IUsuario[] = [];
+
+    if (loggedUser.nivel === "ADM") {
+      postsResponse = await getPosts(false, true);
+      let ids = postsResponse.map((post) => post.idUsuarioFk);
+      ids = ids.filter(
+        (item, index) => ids.indexOf(item) === index && item !== loggedUser.id
+      );
+      authors = await getUserById(ids);
+      authors.push(loggedUser);
+    } else {
+      postsResponse = await getPostsByAuthorId(loggedUser.id, true);
+      authors.push(loggedUser);
+    }
+
+    postsResponse.forEach(
+      (post) =>
+        (post.escritor = authors.find(
+          (author) => author.id === post.idUsuarioFk
+        ))
+    );
+    setPosts(postsResponse);
   };
 
   const handleDeletePost = (postToDelete: IPostagem) => {
@@ -49,7 +69,7 @@ export default function MinhasPostagens() {
             if (success) {
               iziToast.success({
                 position: "bottomCenter",
-                message: `Postagem excluída com sucesso`,
+                message: `Postagem excluída`,
               });
               const postsUpdated = posts.filter(
                 (p) => p.id !== postToDelete.id
@@ -74,7 +94,7 @@ export default function MinhasPostagens() {
       close: true,
       overlay: true,
       zindex: 999,
-      message: `Deseja ${approve ? "aprovar" : "desaprovar"} essa postagem?`,
+      message: `Deseja ${approve ? "aprovar" : "reprovar"} essa postagem?`,
       position: "center",
       buttons: [
         [
@@ -104,7 +124,7 @@ export default function MinhasPostagens() {
             if (success) {
               iziToast.success({
                 position: "bottomCenter",
-                message: `Postagem ${approve ? "aprovada" : "desaprovada"}`,
+                message: `Postagem ${approve ? "aprovada" : "reprovada"}`,
               });
 
               const postsUpdated = posts.map((p) => {
@@ -118,9 +138,7 @@ export default function MinhasPostagens() {
             } else {
               iziToast.error({
                 position: "bottomCenter",
-                message: `Erro ao ${
-                  approve ? "aprovar" : "desaprovar"
-                } postagem`,
+                message: `Erro ao ${approve ? "aprovar" : "reprovar"} postagem`,
               });
 
               const postsUpdated = posts.map((p) => {
@@ -145,7 +163,9 @@ export default function MinhasPostagens() {
 
   return (
     <>
-      <h1 className="display-5 fw-bold mb-5">Minhas postagens</h1>
+      <h1 className="display-5 fw-bold mb-5">
+        {loggedUser.nivel === "ADM" ? "Todas postagens" : "Minhas postagens"}
+      </h1>
       <div className="row">
         {posts.length > 0 ? (
           posts.map((post) => (
@@ -169,16 +189,15 @@ export default function MinhasPostagens() {
                         <i className="fa-regular fa-pen-to-square"></i>
                       </Link>
                     </div>
-                    {post.escritor?.nivel !== "ADM" && (
+                    {loggedUser?.nivel !== "ADM" && (
                       <div className="card-footer text-muted">
-                        Essa postagem está inativa, aguarde o administrador
-                        aprova-lá
+                        {post.ativo === 1
+                          ? "Essa postagem está ativa"
+                          : "Essa postagem ainda não foi aprovada, aguarde o administrador aprova-lá"}
                       </div>
                     )}
-                    {post.escritor?.nivel === "ADM" && (
+                    {loggedUser?.nivel === "ADM" && (
                       <div className="card-footer text-muted">
-                        {post.escritor?.nivel !== "ADM" &&
-                          "Essa postagem está inativa, aguarde o administrador aprova-lá "}
                         <div className="form-check">
                           <input
                             className="form-check-input"
@@ -202,7 +221,7 @@ export default function MinhasPostagens() {
             </div>
           ))
         ) : (
-          <p>Nenhuma postagem foi cadastrada ainda</p>
+          <p>Nenhuma postagem foi feita ainda</p>
         )}
       </div>
     </>

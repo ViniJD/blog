@@ -38,7 +38,7 @@ export default function Home() {
               cadastrar como um <span className="fw-bold">escritor</span>.
             </p>
             <Link className="btn btn-warning" to="/postagens">
-              Ver todas as postagens
+              Ver todas postagens
             </Link>
           </div>
         </div>
@@ -66,7 +66,7 @@ export default function Home() {
               {lastPost.id ? (
                 <CardPostagem post={lastPost} />
               ) : (
-                <p>Nenhuma postagem foi cadastrada ainda</p>
+                <p>Nenhuma postagem foi feita ainda</p>
               )}
             </div>
           </div>

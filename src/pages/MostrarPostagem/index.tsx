@@ -130,7 +130,7 @@ export default function MostrarPostagem() {
 
     iziToast.success({
       position: "bottomCenter",
-      message: "Comentário realizado com sucesso",
+      message: "Comentário realizado",
     });
 
     const postUpdated = post;
@@ -179,7 +179,7 @@ export default function MostrarPostagem() {
 
               iziToast.success({
                 position: "bottomCenter",
-                message: "Comentário excluído com sucesso",
+                message: "Comentário excluído",
               });
             } else {
               iziToast.error({
@@ -233,10 +233,13 @@ export default function MostrarPostagem() {
     }
   };
 
-  const showUnloggedAlert = () => {
+  const showUnloggedOrInactiveAlert = () => {
     iziToast.warning({
       position: "bottomCenter",
-      message: `Você precisa estar logado para curtir ou comentar`,
+      message:
+        post.ativo === 0
+          ? "Essa postagem ainda não foi aprovada, por isso não pode ser comentada ou curtida"
+          : `Você precisa estar logado para curtir ou comentar`,
     });
   };
 
@@ -269,6 +272,12 @@ export default function MostrarPostagem() {
         }}
       />
       <div className="container mt-5">
+        {post.ativo === 0 && (
+          <div className="alert alert-warning fw-bold">
+            <i className="fa-solid fa-triangle-exclamation"></i> Essa postagem
+            ainda não foi aprovada, por isso não pode ser comentada ou curtida
+          </div>
+        )}
         <h1 className="display-5 fw-bold">{post.titulo}</h1>
         <p>
           escrito por{" "}
@@ -287,16 +296,21 @@ export default function MostrarPostagem() {
         />
         <div className="row">
           <div className="col-8">
-            {!loggedUser && (
-              <div
-                className="container mt-5 z-3 position-absolute rounded-3 bg-secondary opacity-0"
-                style={{
-                  height: 152,
-                  cursor: "pointer",
-                }}
-                onClick={!loggedUser ? () => showUnloggedAlert() : () => {}}
-              ></div>
-            )}
+            {!loggedUser ||
+              (post.ativo === 0 && (
+                <div
+                  className="container mt-5 z-3 position-absolute rounded-3 bg-secondary opacity-0"
+                  style={{
+                    height: 152,
+                    cursor: "pointer",
+                  }}
+                  onClick={
+                    !loggedUser || post.ativo === 0
+                      ? () => showUnloggedOrInactiveAlert()
+                      : () => {}
+                  }
+                ></div>
+              ))}
 
             <form autoComplete="off" onSubmit={handleSubmit}>
               <label htmlFor="conteudo" className="form-label fs-3 fw-bold">

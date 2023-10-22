@@ -11,11 +11,13 @@ interface IProps {
 export default function Sidebar({ children }: IProps) {
   const [routesToHideMenu] = useState<string[]>(["/dashboard"]);
   const [activeRoute, setActiveRoute] = useState<string>("");
+  const [loggedUser] = useState<IUsuario>(getItem("loggedUser"));
   const location = useLocation();
   const navigate = useNavigate();
   const [routes] = useState<IRoute[]>([
     {
-      label: "Minhas postagens",
+      label:
+        loggedUser.nivel === "ADM" ? "Todas postagens" : "Minhas postagens",
       route: "/dashboard/postagens",
       role: ["ADM", "ESC"],
     },
@@ -25,8 +27,9 @@ export default function Sidebar({ children }: IProps) {
       role: ["ADM", "ESC"],
     },
     {
-      label: "Meus cometários",
-      route: "/dashboard/meuscomentarios",
+      label:
+        loggedUser.nivel === "ADM" ? "Todos comentários" : "Meus comentários",
+      route: "/dashboard/comentarios",
       role: ["ADM", "ESC", "LEI"],
     },
     {
@@ -41,13 +44,19 @@ export default function Sidebar({ children }: IProps) {
     },
   ]);
 
+  const signout = () => {
+    removeItem("loggedUser");
+    navigate("/");
+  };
+
   useEffect(() => {
     setActiveRoute(location.pathname);
   }, [location]);
 
-  const signout = useCallback(() => {
-    removeItem("loggedUser");
-    navigate("/");
+  useEffect(() => {
+    if (loggedUser.nivel === "LEI") {
+      navigate("/dashboard/comentarios");
+    }
   }, []);
 
   return (
@@ -70,17 +79,21 @@ export default function Sidebar({ children }: IProps) {
               </Link>
             </div>
             <ul className="nav nav-pills flex-column h-100">
-              {routes.map(({ route, label }, index) => (
-                <li className="nav-item" key={index}>
-                  <Link
-                    className={`nav-link link-body-emphasis ${
-                      activeRoute === route && "fw-bold"
-                    }`}
-                    to={route}
-                  >
-                    {label}
-                  </Link>
-                </li>
+              {routes.map(({ route, label, role }, index) => (
+                <>
+                  {role?.includes(loggedUser.nivel) && (
+                    <li className="nav-item" key={index}>
+                      <Link
+                        className={`nav-link link-body-emphasis ${
+                          activeRoute === route && "fw-bold"
+                        }`}
+                        to={route}
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  )}
+                </>
               ))}
               <li className="mt-auto pt-2">
                 <button

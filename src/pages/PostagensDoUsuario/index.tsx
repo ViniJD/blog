@@ -36,7 +36,7 @@ export default function PostagensDoUsuarios() {
               </div>
             ))
           ) : (
-            <p>Nenhuma postagem foi cadastrada por {author.nome}</p>
+            <p>Nenhuma postagem foi feita por {author.nome}</p>
           )}
         </div>
 

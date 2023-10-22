@@ -1,9 +1,12 @@
 import { IPostagem } from "../interfaces/IPostagem";
 import api from "./api";
 
-const getPosts = async (last: boolean = false): Promise<IPostagem[]> => {
+const getPosts = async (
+  last: boolean = false,
+  inactive: boolean = false
+): Promise<IPostagem[]> => {
   const { data } = await api.get<IPostagem[] | IPostagem>(
-    `/postagens?last=${last}`
+    `/postagens?last=${last}&inactive=${inactive}`
   );
   return Array.isArray(data) ? data : [data];
 };

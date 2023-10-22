@@ -31,7 +31,7 @@ export default function Postagens() {
   return (
     <main>
       <div className="container mt-5">
-        <h1 className="display-5 fw-bold mb-5">Todas as postagens</h1>
+        <h1 className="display-5 fw-bold mb-5">Todas postagens</h1>
         <div className="row">
           {posts.length > 0 ? (
             posts.map((post) => (
@@ -40,7 +40,7 @@ export default function Postagens() {
               </div>
             ))
           ) : (
-            <p>Nenhuma postagem foi cadastrada ainda</p>
+            <p>Nenhuma postagem foi feita ainda</p>
           )}
         </div>
 

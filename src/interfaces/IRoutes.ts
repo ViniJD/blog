@@ -1,7 +1,5 @@
 export interface IRoute {
   label: string;
   route: string;
-  role?: TROle[];
+  role?: string[];
 }
-
-type TROle = "ESC" | "ADM" | "LEI";
