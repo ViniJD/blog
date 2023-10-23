@@ -80,9 +80,9 @@ export default function Sidebar({ children }: IProps) {
             </div>
             <ul className="nav nav-pills flex-column h-100">
               {routes.map(({ route, label, role }, index) => (
-                <>
+                <React.Fragment key={index}>
                   {role?.includes(loggedUser.nivel) && (
-                    <li className="nav-item" key={index}>
+                    <li className="nav-item">
                       <Link
                         className={`nav-link link-body-emphasis ${
                           activeRoute === route && "fw-bold"
@@ -93,7 +93,7 @@ export default function Sidebar({ children }: IProps) {
                       </Link>
                     </li>
                   )}
-                </>
+                </React.Fragment>
               ))}
               <li className="mt-auto pt-2">
                 <button

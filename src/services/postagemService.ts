@@ -1,3 +1,4 @@
+import { IErrorResponse } from "../interfaces/IErrorResponse";
 import { IPostagem } from "../interfaces/IPostagem";
 import api from "./api";
 
@@ -41,10 +42,32 @@ const getPostById = async (id: number): Promise<IPostagem> => {
   return data;
 };
 
+const createPost = async (
+  postData: IPostagem
+): Promise<IPostagem | IErrorResponse> => {
+  const { data, status } = await api.post<IPostagem>(`/postagens`, {
+    titulo: postData.titulo,
+    imagem: postData.imagem,
+    conteudo: postData.conteudo,
+    ativo: postData.ativo,
+    idUsuarioFk: postData.idUsuarioFk,
+  });
+
+  if (status === 500) {
+    return {
+      status: status,
+      message: "Erro ao cadastrar postagem. Tente novamente",
+    };
+  }
+
+  return data;
+};
+
 export {
   getPosts,
   getPostsByAuthorId,
   getPostById,
   approveOrDisapprovePost,
   deletePost,
+  createPost,
 };

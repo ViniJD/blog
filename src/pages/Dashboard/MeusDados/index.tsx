@@ -40,6 +40,33 @@ export default function MeusDados() {
     }
   };
 
+  const handleDeleteAccount = () => {
+    iziToast.question({
+      timeout: 10000,
+      close: true,
+      overlay: true,
+      zindex: 999,
+      message: `Deseja realmente excluir sua conta? Todos as curtidas e comentários que você fez e que foram feitas nas suas postagens e também serão excluidas.`,
+      position: "center",
+      buttons: [
+        [
+          "<button><b>Não</b></button>",
+          (instance, toast) => {
+            instance.hide({ transitionOut: "fadeOut" }, toast, "button");
+          },
+          true,
+        ],
+        [
+          "<button>Sim</button>",
+          async (instance, toast) => {
+            instance.hide({ transitionOut: "fadeOut" }, toast, "button");
+          },
+          false,
+        ],
+      ],
+    });
+  };
+
   return (
     <div className="container">
       <div className="row">
@@ -117,6 +144,13 @@ export default function MeusDados() {
             <div className="d-grid">
               <button className="btn btn-warning" type="submit">
                 Salvar
+              </button>
+              <button
+                className="btn btn-outline-danger mt-4"
+                type="button"
+                onClick={handleDeleteAccount}
+              >
+                Excluir minha conta
               </button>
             </div>
           </form>

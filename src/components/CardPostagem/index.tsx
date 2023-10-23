@@ -29,6 +29,7 @@ export default function CardPostagem({
         <h5 className="card-title">{post.titulo}</h5>
         <p
           className="card-text text-truncate"
+          style={{ maxHeight: "4rem" }}
           dangerouslySetInnerHTML={{
             __html: `${post.conteudo}`,
           }}

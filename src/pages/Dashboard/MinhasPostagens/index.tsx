@@ -28,7 +28,7 @@ export default function MinhasPostagens() {
       ids = ids.filter(
         (item, index) => ids.indexOf(item) === index && item !== loggedUser.id
       );
-      authors = await getUserById(ids);
+      authors = ids.length > 0 ? await getUserById(ids) : [];
       authors.push(loggedUser);
     } else {
       postsResponse = await getPostsByAuthorId(loggedUser.id, true);

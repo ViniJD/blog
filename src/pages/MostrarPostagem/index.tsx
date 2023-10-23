@@ -138,7 +138,7 @@ export default function MostrarPostagem() {
     postUpdated.comentarios?.push(comment);
 
     const valuesUpdated = values;
-    values.conteudo = {
+    valuesUpdated.conteudo = {
       value: "",
       errorMessage: "",
       hasError: false,
@@ -324,6 +324,7 @@ export default function MostrarPostagem() {
                 id="conteudo"
                 name="conteudo"
                 rows={3}
+                maxLength={250}
                 disabled={!loggedUser && true}
                 value={values.conteudo ? values.conteudo.value : ""}
                 onChange={handleChangeValue}
