@@ -296,21 +296,22 @@ export default function MostrarPostagem() {
         />
         <div className="row">
           <div className="col-8">
-            {!loggedUser ||
-              (post.ativo === 0 && (
-                <div
-                  className="container mt-5 z-3 position-absolute rounded-3 bg-secondary opacity-0"
-                  style={{
-                    height: 152,
-                    cursor: "pointer",
-                  }}
-                  onClick={
-                    !loggedUser || post.ativo === 0
-                      ? () => showUnloggedOrInactiveAlert()
-                      : () => {}
-                  }
-                ></div>
-              ))}
+            {!loggedUser || post.ativo === 0 ? (
+              <div
+                className="container mt-5 z-3 position-absolute rounded-3 bg-secondary opacity-0"
+                style={{
+                  height: 152,
+                  cursor: "pointer",
+                }}
+                onClick={
+                  !loggedUser || post.ativo === 0
+                    ? () => showUnloggedOrInactiveAlert()
+                    : () => {}
+                }
+              ></div>
+            ) : (
+              <></>
+            )}
 
             <form autoComplete="off" onSubmit={handleSubmit}>
               <label htmlFor="conteudo" className="form-label fs-3 fw-bold">
