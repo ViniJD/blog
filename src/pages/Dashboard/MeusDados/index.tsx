@@ -1,10 +1,81 @@
 import iziToast from "izitoast";
 import { ChangeEvent, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import {
+  handleChangeValue as changeValue,
+  handleSetError,
+  verifyIfHasError,
+} from "../../../hooks/useForm";
+import { IForm, IFormValues } from "../../../interfaces/IFormControl";
+import { IUsuario } from "../../../interfaces/IUsuario";
+import { getItem } from "../../../services/localStorageService";
+import {
+  minLengthValidator,
+  requiredValidator,
+} from "../../../services/validators";
 
 export default function MeusDados() {
-  const [level, setLevel] = useState<string>("LEI");
+  const [levelHasBeenChangedPreviuosly, setLevelHasBeenChangedPreviuosly] =
+    useState<boolean>(true);
+  const [disableButton, setDisableButton] = useState<boolean>(false);
+  const [loggedUser] = useState<IUsuario>(getItem("loggedUser"));
+  const [loading, setLoading] = useState<boolean>(false);
+  const location = useLocation();
+  const [values, setValues] = useState<IFormValues>({
+    nome: {} as IForm,
+    login: {} as IForm,
+    nivel: {} as IForm,
+    senha: {} as IForm,
+  });
 
-  const handleChangeLevel = (e: ChangeEvent<HTMLInputElement>) => {
+  const getLoggedUserData = async () => {};
+
+  const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const auxValues = changeValue(values, e.target.name, e.target.value);
+    setValues(auxValues);
+  };
+
+  const handleVerifyIfHasError = (
+    event: React.FocusEvent<HTMLInputElement>
+  ) => {
+    event.preventDefault();
+
+    const name = event.target.name;
+    const value = event.target.value;
+    let auxValues: IFormValues;
+
+    if (name !== "senha") {
+      if (requiredValidator(value)) {
+        auxValues = handleSetError(
+          values,
+          name,
+          true,
+          requiredValidator(value)
+        );
+      } else {
+        auxValues = handleSetError(values, name, false, "");
+      }
+
+      setValues(auxValues);
+      setDisableButton(verifyIfHasError(values));
+    } else {
+      if (minLengthValidator(value) && !requiredValidator(value)) {
+        auxValues = handleSetError(
+          values,
+          name,
+          true,
+          minLengthValidator(value)
+        );
+      } else {
+        auxValues = handleSetError(values, name, false, "");
+      }
+
+      setValues(auxValues);
+      setDisableButton(verifyIfHasError(values));
+    }
+  };
+
+  const handleChangeLevel = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value === "ESC") {
       iziToast.question({
         timeout: 10000,
@@ -20,7 +91,8 @@ export default function MeusDados() {
             "<button><b>Não</b></button>",
             (instance, toast) => {
               instance.hide({ transitionOut: "fadeOut" }, toast, "button");
-              setLevel("LEI");
+              e.target.value = "LEI";
+              handleChangeValue(e);
             },
             true,
           ],
@@ -28,15 +100,14 @@ export default function MeusDados() {
             "<button>Sim</button>",
             (instance, toast) => {
               instance.hide({ transitionOut: "fadeOut" }, toast, "button");
-              setLevel("ESC");
+              handleChangeValue(e);
             },
             false,
           ],
         ],
-        onClosing: () => {
-          setLevel("LEI");
-        },
       });
+    } else {
+      handleChangeValue(e);
     }
   };
 
@@ -67,6 +138,41 @@ export default function MeusDados() {
     });
   };
 
+  const showWriterMessage = () => {
+    iziToast.warning({
+      position: "bottomCenter",
+      message: `O seu perfil é do nível ESCRITOR. Não é mais possível voltar para LEITOR`,
+    });
+  };
+
+  useEffect(() => {
+    getLoggedUserData();
+    setLevelHasBeenChangedPreviuosly(loggedUser.nivel !== "ESC");
+
+    setValues({
+      nome: {
+        value: loggedUser.nome,
+        hasError: false,
+        errorMessage: "",
+      },
+      login: {
+        value: loggedUser.login,
+        hasError: false,
+        errorMessage: "",
+      },
+      nivel: {
+        value: loggedUser.nivel,
+        hasError: false,
+        errorMessage: "",
+      },
+      senha: {
+        value: "",
+        hasError: false,
+        errorMessage: "",
+      },
+    });
+  }, [location]);
+
   return (
     <div className="container">
       <div className="row">
@@ -79,10 +185,21 @@ export default function MeusDados() {
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={`form-control ${
+                  values.nome.hasError ? "is-invalid" : ""
+                }`}
                 id="nome"
+                name="nome"
                 placeholder="Seu Nome Completo"
+                value={values.nome ? values.nome.value : ""}
+                onChange={handleChangeValue}
+                onBlur={handleVerifyIfHasError}
               />
+              {values.nome.hasError && (
+                <div className="invalid-feedback">
+                  {values.nome.errorMessage}
+                </div>
+              )}
             </div>
             <div className="mb-3">
               <label htmlFor="login" className="form-label">
@@ -90,10 +207,21 @@ export default function MeusDados() {
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={`form-control ${
+                  values.login.hasError ? "is-invalid" : ""
+                }`}
                 id="login"
+                name="login"
                 placeholder="seu@email.com"
+                value={values.login ? values.login.value : ""}
+                onChange={handleChangeValue}
+                onBlur={handleVerifyIfHasError}
               />
+              {values.login.hasError && (
+                <div className="invalid-feedback">
+                  {values.login.errorMessage}
+                </div>
+              )}
             </div>
             <div className="row mb-3">
               <div className="col-6">
@@ -101,15 +229,33 @@ export default function MeusDados() {
                   Senha
                 </label>
                 <input
-                  type="senha"
-                  className="form-control"
-                  id="password"
+                  type="password"
+                  className={`form-control ${
+                    values.senha.hasError ? "is-invalid" : ""
+                  }`}
+                  id="senha"
+                  name="senha"
                   placeholder="*******"
+                  value={values.senha ? values.senha.value : ""}
+                  onChange={handleChangeValue}
+                  onBlur={handleVerifyIfHasError}
                 />
+                {values.senha.hasError && (
+                  <div className="invalid-feedback">
+                    {values.senha.errorMessage}
+                  </div>
+                )}
               </div>
               <div className="col-6">
                 <label className="form-label">Seu nível</label>
-                <div className="d-flex mt-2">
+                <div
+                  className="d-flex mt-2"
+                  onClick={
+                    loggedUser.nivel === "ESC"
+                      ? () => showWriterMessage()
+                      : () => {}
+                  }
+                >
                   <div className="form-check">
                     <input
                       className="form-check-input"
@@ -117,7 +263,16 @@ export default function MeusDados() {
                       value="LEI"
                       name="nivel"
                       id="leitor"
-                      checked={level === "LEI"}
+                      disabled={
+                        values.nivel.value === "ESC" &&
+                        !levelHasBeenChangedPreviuosly
+                      }
+                      checked={values.nivel.value === "LEI"}
+                      onChange={
+                        levelHasBeenChangedPreviuosly
+                          ? (e) => handleChangeLevel(e)
+                          : () => {}
+                      }
                     />
                     <label className="form-check-label" htmlFor="leitor">
                       Leitor
@@ -130,7 +285,11 @@ export default function MeusDados() {
                       value="ESC"
                       name="nivel"
                       id="escritor"
-                      checked={level === "ESC"}
+                      disabled={
+                        values.nivel.value === "ESC" &&
+                        !levelHasBeenChangedPreviuosly
+                      }
+                      checked={values.nivel.value === "ESC"}
                       onChange={handleChangeLevel}
                     />
                     <label className="form-check-label" htmlFor="escritor">
@@ -142,9 +301,19 @@ export default function MeusDados() {
               </div>
             </div>
             <div className="d-grid">
-              <button className="btn btn-warning" type="submit">
-                Salvar
-              </button>
+              {!loading ? (
+                <button
+                  className="btn btn-warning"
+                  type="submit"
+                  disabled={disableButton}
+                >
+                  Salvar
+                </button>
+              ) : (
+                <button className="btn btn-warning" type="button" disabled>
+                  <span className="spinner-border text-dark spinner-border-sm"></span>
+                </button>
+              )}
               <button
                 className="btn btn-outline-danger mt-4"
                 type="button"

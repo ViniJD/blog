@@ -9,7 +9,10 @@ import {
 import { IForm, IFormValues } from "../../interfaces/IFormControl";
 import { setItem } from "../../services/localStorageService";
 import { register } from "../../services/usuarioService";
-import { requiredValidator } from "../../services/validators";
+import {
+  minLengthValidator,
+  requiredValidator,
+} from "../../services/validators";
 
 export default function Cadastrar() {
   const [disableButton, setDisableButton] = useState<boolean>(true);
@@ -43,6 +46,27 @@ export default function Cadastrar() {
       auxValues = handleSetError(values, name, true, requiredValidator(value));
     } else {
       auxValues = handleSetError(values, name, false, "");
+    }
+
+    if (name === "senha") {
+      if (requiredValidator(value)) {
+        auxValues = handleSetError(
+          values,
+          name,
+          true,
+          requiredValidator(value)
+        );
+      } else if (minLengthValidator(value, 6)) {
+        auxValues = {
+          ...values,
+          ...handleSetError(values, name, true, minLengthValidator(value, 6)),
+        };
+      } else {
+        auxValues = {
+          ...values,
+          ...handleSetError(values, name, false, ""),
+        };
+      }
     }
 
     setValues(auxValues);

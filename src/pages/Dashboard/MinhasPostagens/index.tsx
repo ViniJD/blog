@@ -192,7 +192,7 @@ export default function MinhasPostagens() {
                     {loggedUser?.nivel !== "ADM" && (
                       <div className="card-footer text-muted">
                         {post.ativo === 1
-                          ? "Essa postagem está ativa"
+                          ? "Essa postagem foi aprovada"
                           : "Essa postagem ainda não foi aprovada, aguarde o administrador aprova-lá"}
                       </div>
                     )}
