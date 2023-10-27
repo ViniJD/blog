@@ -44,7 +44,7 @@ export default function MostrarPostagem() {
   });
 
   const getPostByAuthor = async () => {
-    const postById = await getPostById(Number(id));
+    const [postById] = await getPostById([Number(id)]);
     const likes = await getLikesByPostId(postById.id);
     const comments = await getCommentsByPostId(postById.id);
 

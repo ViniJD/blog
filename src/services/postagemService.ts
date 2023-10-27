@@ -37,8 +37,10 @@ const deletePost = async (id: number): Promise<boolean> => {
   return status === 204;
 };
 
-const getPostById = async (id: number): Promise<IPostagem> => {
-  const { data } = await api.get<IPostagem>(`/postagens/${id}`);
+const getPostById = async (ids: number[]): Promise<IPostagem[]> => {
+  const { data } = await api.get<IPostagem[]>(
+    `/postagens?ids=${ids.join(",")}`
+  );
   return data;
 };
 

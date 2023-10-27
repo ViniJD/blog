@@ -1,5 +1,5 @@
 import iziToast from "izitoast";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   handleChangeValue as changeValue,
@@ -8,7 +8,8 @@ import {
 } from "../../../hooks/useForm";
 import { IForm, IFormValues } from "../../../interfaces/IFormControl";
 import { IUsuario } from "../../../interfaces/IUsuario";
-import { getItem } from "../../../services/localStorageService";
+import { getItem, setItem } from "../../../services/localStorageService";
+import { updateUser } from "../../../services/usuarioService";
 import {
   minLengthValidator,
   requiredValidator,
@@ -18,7 +19,7 @@ export default function MeusDados() {
   const [levelHasBeenChangedPreviuosly, setLevelHasBeenChangedPreviuosly] =
     useState<boolean>(true);
   const [disableButton, setDisableButton] = useState<boolean>(false);
-  const [loggedUser] = useState<IUsuario>(getItem("loggedUser"));
+  const [loggedUser, setLoggedUser] = useState<IUsuario>(getItem("loggedUser"));
   const [loading, setLoading] = useState<boolean>(false);
   const location = useLocation();
   const [values, setValues] = useState<IFormValues>({
@@ -27,8 +28,6 @@ export default function MeusDados() {
     nivel: {} as IForm,
     senha: {} as IForm,
   });
-
-  const getLoggedUserData = async () => {};
 
   const handleChangeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     const auxValues = changeValue(values, e.target.name, e.target.value);
@@ -73,6 +72,77 @@ export default function MeusDados() {
       setValues(auxValues);
       setDisableButton(verifyIfHasError(values));
     }
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    setLoading(true);
+    e.preventDefault();
+
+    const response = await updateUser({
+      id: loggedUser.id,
+      nome: values.nome.value,
+      login: values.login.value,
+      nivel: values.nivel.value,
+      senha: values.senha.value === "" ? "" : btoa(values.senha.value),
+    });
+
+    if (response.status === 409) {
+      iziToast.error({
+        position: "bottomCenter",
+        message: response.message,
+      });
+    } else if (response.status === 204) {
+      iziToast.success({
+        position: "bottomCenter",
+        message: "Dados atualizados com sucesso",
+      });
+
+      setItem("loggedUser", {
+        id: loggedUser.id,
+        nome: values.nome.value,
+        login: values.login.value,
+        nivel: values.nivel.value,
+        senha: null,
+      });
+
+      setLoggedUser({
+        id: loggedUser.id,
+        nome: values.nome.value,
+        login: values.login.value,
+        nivel: values.nivel.value,
+        senha: undefined,
+      });
+
+      setValues({
+        nome: {
+          value: values.nome.value,
+          hasError: false,
+          errorMessage: "",
+        },
+        login: {
+          value: values.login.value,
+          hasError: false,
+          errorMessage: "",
+        },
+        nivel: {
+          value: values.nivel.value,
+          hasError: false,
+          errorMessage: "",
+        },
+        senha: {
+          value: "",
+          hasError: false,
+          errorMessage: "",
+        },
+      });
+    } else {
+      iziToast.error({
+        position: "bottomCenter",
+        message: "Erro ao atualizar dados",
+      });
+    }
+
+    setLoading(false);
   };
 
   const handleChangeLevel = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,12 +211,18 @@ export default function MeusDados() {
   const showWriterMessage = () => {
     iziToast.warning({
       position: "bottomCenter",
-      message: `O seu perfil é do nível ESCRITOR. Não é mais possível voltar para LEITOR`,
+      message: `O seu perfil é do nível ESCRITOR. Não é mais possível voltar para LEITOR.`,
+    });
+  };
+
+  const showADMMessage = () => {
+    iziToast.warning({
+      position: "bottomCenter",
+      message: `O seu perfil é do nível ADMINISTRADOR. Você possui total controle sobre as postagens, curtidas, comentários e usuários. Além disso pode ter suas próprias postagens.`,
     });
   };
 
   useEffect(() => {
-    getLoggedUserData();
     setLevelHasBeenChangedPreviuosly(loggedUser.nivel !== "ESC");
 
     setValues({
@@ -178,7 +254,7 @@ export default function MeusDados() {
       <div className="row">
         <h1 className="display-5 fw-bold mb-5">Meus dados</h1>
         <div className="col-6 offset-3">
-          <form className="mb-3" autoComplete="off">
+          <form className="mb-3" autoComplete="off" onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="nome" className="form-label">
                 Nome
@@ -246,59 +322,89 @@ export default function MeusDados() {
                   </div>
                 )}
               </div>
-              <div className="col-6">
-                <label className="form-label">Seu nível</label>
-                <div
-                  className="d-flex mt-2"
-                  onClick={
-                    loggedUser.nivel === "ESC"
-                      ? () => showWriterMessage()
-                      : () => {}
-                  }
-                >
-                  <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      value="LEI"
-                      name="nivel"
-                      id="leitor"
-                      disabled={
-                        values.nivel.value === "ESC" &&
-                        !levelHasBeenChangedPreviuosly
-                      }
-                      checked={values.nivel.value === "LEI"}
-                      onChange={
-                        levelHasBeenChangedPreviuosly
-                          ? (e) => handleChangeLevel(e)
-                          : () => {}
-                      }
-                    />
-                    <label className="form-check-label" htmlFor="leitor">
-                      Leitor
-                    </label>
+              {loggedUser.nivel !== "ADM" ? (
+                <div className="col-6">
+                  <label className="form-label">Seu nível</label>
+                  <div
+                    className="d-flex mt-2"
+                    onClick={
+                      loggedUser.nivel === "ESC"
+                        ? () => showWriterMessage()
+                        : () => {}
+                    }
+                  >
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        value="LEI"
+                        name="nivel"
+                        id="leitor"
+                        disabled={
+                          values.nivel.value === "ESC" &&
+                          !levelHasBeenChangedPreviuosly
+                        }
+                        checked={values.nivel.value === "LEI"}
+                        onChange={
+                          levelHasBeenChangedPreviuosly
+                            ? (e) => handleChangeLevel(e)
+                            : () => {}
+                        }
+                      />
+                      <label className="form-check-label" htmlFor="leitor">
+                        Leitor
+                      </label>
+                    </div>
+                    <div className="form-check ms-4">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        value="ESC"
+                        name="nivel"
+                        id="escritor"
+                        disabled={
+                          values.nivel.value === "ESC" &&
+                          !levelHasBeenChangedPreviuosly
+                        }
+                        checked={values.nivel.value === "ESC"}
+                        onChange={handleChangeLevel}
+                      />
+                      <label className="form-check-label" htmlFor="escritor">
+                        Escritor
+                      </label>
+                    </div>
                   </div>
-                  <div className="form-check ms-4">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      value="ESC"
-                      name="nivel"
-                      id="escritor"
-                      disabled={
-                        values.nivel.value === "ESC" &&
-                        !levelHasBeenChangedPreviuosly
-                      }
-                      checked={values.nivel.value === "ESC"}
-                      onChange={handleChangeLevel}
-                    />
-                    <label className="form-check-label" htmlFor="escritor">
-                      Escritor
-                    </label>
-                  </div>
+                  <p></p>
                 </div>
-                <p></p>
-              </div>
+              ) : (
+                <div className="col-6">
+                  <label className="form-label">Seu nível</label>
+                  <div
+                    className="d-flex mt-2"
+                    onClick={
+                      loggedUser.nivel === "ADM"
+                        ? () => showADMMessage()
+                        : () => {}
+                    }
+                  >
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        value="ADM"
+                        name="nivel"
+                        id="adm"
+                        disabled={values.nivel.value === "ADM"}
+                        checked={values.nivel.value === "ADM"}
+                      />
+                      <label className="form-check-label" htmlFor="adm">
+                        Administrador
+                      </label>
+                    </div>
+                  </div>
+                  <p></p>
+                </div>
+              )}
             </div>
             <div className="d-grid">
               {!loading ? (
@@ -314,13 +420,15 @@ export default function MeusDados() {
                   <span className="spinner-border text-dark spinner-border-sm"></span>
                 </button>
               )}
-              <button
-                className="btn btn-outline-danger mt-4"
-                type="button"
-                onClick={handleDeleteAccount}
-              >
-                Excluir minha conta
-              </button>
+              {loggedUser.nivel !== "ADM" && (
+                <button
+                  className="btn btn-outline-danger mt-4"
+                  type="button"
+                  onClick={handleDeleteAccount}
+                >
+                  Excluir minha conta
+                </button>
+              )}
             </div>
           </form>
         </div>
