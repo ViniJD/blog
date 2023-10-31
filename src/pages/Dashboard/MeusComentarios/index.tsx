@@ -9,9 +9,18 @@ import {
   getCommentsByUserId,
 } from "../../../services/comentarioService";
 import { getItem } from "../../../services/localStorageService";
+import { IPostagem } from "../../../interfaces/IPostagem";
+import { getPostById } from "../../../services/postagemService";
+
+interface IPostagemEComentario {
+  post: IPostagem;
+  comment: IComentario;
+}
 
 export default function MeusComentarios() {
-  const [comments, setComments] = useState<IComentario[]>([]);
+  const [postsAndComments, setPostsAndComments] = useState<
+    IPostagemEComentario[]
+  >([]);
   const [loggedUser] = useState<IUsuario>(getItem("loggedUser"));
   const location = useLocation();
 
@@ -21,7 +30,29 @@ export default function MeusComentarios() {
         ? await getComments()
         : await getCommentsByUserId(loggedUser.id);
 
-    setComments(commentsResponse);
+    let postIds = commentsResponse.map((cm) => cm.idPostagemFk);
+
+    if (postIds.length > 0) {
+      postIds = postIds.filter(
+        (item, index) => postIds.indexOf(item) === index
+      );
+      const postsResponse = await getPostById(postIds);
+
+      const commentAndLike = commentsResponse.map((comment) => {
+        const post = postsResponse.find(
+          (post) => post.id === comment.idPostagemFk
+        ) as IPostagem;
+
+        return {
+          comment,
+          post,
+        };
+      });
+
+      setPostsAndComments(commentAndLike);
+    } else {
+      setPostsAndComments([]);
+    }
   };
 
   const handleDeleteComment = async (id: number) => {
@@ -74,26 +105,26 @@ export default function MeusComentarios() {
     <>
       <h1 className="display-5 fw-bold mb-5">Meus comentários</h1>
       <div className="row">
-        {comments.length > 0 ? (
-          comments.map((comment) => (
-            <div className="col-4 mb-4" key={comment.id}>
+        {postsAndComments.length > 0 ? (
+          postsAndComments.map((pc) => (
+            <div className="col-4 mb-4" key={pc.comment.id}>
               <div className="card">
                 <div className="card-body">
                   <p>
                     <Link
-                      to={`/postagens/${comment.idPostagemFk}`}
+                      to={`/postagens/${pc.post.id}`}
                       target="_blank"
                       className="text-dark fw-bold"
                     >
-                      Ver postagem
+                      {pc.post.titulo}
                     </Link>
                   </p>
-                  {comment.conteudo}
+                  {pc.comment.conteudo}
                 </div>
                 <div className="card-footer text-muted">
                   <button
                     className="btn btn-outline-danger me-1"
-                    onClick={() => handleDeleteComment(comment.id)}
+                    onClick={() => handleDeleteComment(pc.comment.id)}
                   >
                     <i className="fa-regular fa-trash-can"></i>
                   </button>

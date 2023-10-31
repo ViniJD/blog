@@ -27,22 +27,32 @@ export default function PostagensDoUsuarios() {
   return (
     <main>
       <div className="container mt-5">
-        <h1 className="display-5 fw-bold mb-5">Postagens por {author.nome}</h1>
-        <div className="row">
-          {posts.length > 0 ? (
-            posts.map((post) => (
-              <div className="col-4 mb-4" key={post.id}>
-                <CardPostagem post={post} />
-              </div>
-            ))
-          ) : (
-            <p>Nenhuma postagem foi feita por {author.nome}</p>
-          )}
-        </div>
+        {author ? (
+          <>
+            <h1 className="display-5 fw-bold mb-5">
+              Postagens por {author.nome}
+            </h1>
+            <div className="row">
+              {posts.length > 0 ? (
+                posts.map((post) => (
+                  <div className="col-4 mb-4" key={post.id}>
+                    <CardPostagem post={post} />
+                  </div>
+                ))
+              ) : (
+                <p>Nenhuma postagem foi feita por {author.nome}</p>
+              )}
+            </div>
 
-        <footer className="pt-3 my-4 text-body-secondary border-top">
-          PI 2 • 2023
-        </footer>
+            <footer className="pt-3 my-4 text-body-secondary border-top">
+              PI 2 • 2023
+            </footer>
+          </>
+        ) : (
+          <>
+            <h1 className="display-5 fw-bold mb-5">Usuário não encontrado</h1>
+          </>
+        )}
       </div>
     </main>
   );

@@ -16,6 +16,8 @@ import NovaPostagem from "../pages/Dashboard/NovaPostagem";
 import MeusDados from "../pages/Dashboard/MeusDados";
 import MeusComentarios from "../pages/Dashboard/MeusComentarios";
 import PostagensCurtidas from "../pages/Dashboard/PostagensCurtidas";
+import TodosUsuarios from "../pages/Dashboard/TodosUsuarios";
+import EditarPostagem from "../pages/Dashboard/EditarPostagem";
 
 export default function RoutesIndex() {
   const location = useLocation();
@@ -40,6 +42,14 @@ export default function RoutesIndex() {
           }
         />
         <Route
+          path="/dashboard/usuarios"
+          element={
+            <Sidebar>
+              <TodosUsuarios />
+            </Sidebar>
+          }
+        />
+        <Route
           path="/dashboard/postagens/nova"
           element={
             <Sidebar>
@@ -51,7 +61,7 @@ export default function RoutesIndex() {
           path="/dashboard/postagens/:id/editar"
           element={
             <Sidebar>
-              <h1>editar</h1>
+              <EditarPostagem />
             </Sidebar>
           }
         />

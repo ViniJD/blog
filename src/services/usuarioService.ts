@@ -69,4 +69,14 @@ const getUserById = async (ids: number[]): Promise<IUsuario[]> => {
   return data;
 };
 
-export { getUserById, register, signin, updateUser };
+const getUsers = async (): Promise<IUsuario[]> => {
+  const { data } = await api.get<IUsuario[]>(`/usuarios`);
+  return data;
+};
+
+const deleteUser = async (id: number): Promise<boolean> => {
+  const { status } = await api.delete(`/usuarios/${id}`);
+  return status === 204;
+};
+
+export { deleteUser, getUserById, getUsers, register, signin, updateUser };

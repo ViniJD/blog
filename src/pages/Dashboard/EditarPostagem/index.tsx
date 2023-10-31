@@ -1,5 +1,6 @@
-import iziToast, { IziToast } from "izitoast";
-import { useState } from "react";
+import iziToast from "izitoast";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   BtnBold,
   BtnBulletList,
@@ -27,21 +28,72 @@ import {
 import { IForm, IFormValues } from "../../../interfaces/IFormControl";
 import { IUsuario } from "../../../interfaces/IUsuario";
 import { getItem } from "../../../services/localStorageService";
-import { createPost } from "../../../services/postagemService";
+import { getPostById, updatePost } from "../../../services/postagemService";
 import {
   maxLengthValidator,
   requiredValidator,
 } from "../../../services/validators";
 
-export default function NovaPostagem() {
-  const [disableButton, setDisableButton] = useState<boolean>(true);
+export default function EditarPostagem() {
+  const [disableButton, setDisableButton] = useState<boolean>(false);
   const [loggedUser] = useState<IUsuario>(getItem("loggedUser"));
   const [loading, setLoading] = useState<boolean>(false);
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [values, setValues] = useState<IFormValues>({
-    imagem: {} as IForm,
+    id: {} as IForm,
     titulo: {} as IForm,
+    imagem: {} as IForm,
     conteudo: {} as IForm,
+    ativo: {} as IForm,
+    idUsuarioFk: {} as IForm,
   });
+
+  const getPost = async () => {
+    const [postResponse] = id ? await getPostById([Number(id)]) : [];
+
+    if (postResponse.idUsuarioFk !== loggedUser.id) {
+      iziToast.warning({
+        position: "bottomCenter",
+        message: "Essa postagem não pertence ao seu usuário",
+      });
+
+      navigate("/dashboard/postagens");
+    } else {
+      setValues({
+        id: {
+          value: `${postResponse.id}`,
+          hasError: false,
+          errorMessage: "",
+        },
+        titulo: {
+          value: postResponse.titulo,
+          hasError: false,
+          errorMessage: "",
+        },
+        imagem: {
+          value: postResponse.imagem,
+          hasError: false,
+          errorMessage: "",
+        },
+        conteudo: {
+          value: postResponse.conteudo,
+          hasError: false,
+          errorMessage: "",
+        },
+        ativo: {
+          value: `${postResponse.ativo}`,
+          hasError: false,
+          errorMessage: "",
+        },
+        idUsuarioFk: {
+          value: `${postResponse.idUsuarioFk}`,
+          hasError: false,
+          errorMessage: "",
+        },
+      });
+    }
+  };
 
   const handleChangeContent = (e: ContentEditableEvent) => {
     handleChangeValue({
@@ -111,64 +163,35 @@ export default function NovaPostagem() {
     setLoading(true);
     e.preventDefault();
 
-    const post = await createPost({
-      idUsuarioFk: loggedUser.id,
+    const success = await updatePost({
+      idUsuarioFk: 0,
       imagem: values.imagem.value,
       titulo: values.titulo.value,
       conteudo: values.conteudo.value,
       ativo: 0,
-      id: 0,
+      id: Number(values.id.value),
     });
 
-    if ("status" in post && post.status === 500) {
-      iziToast.error({
-        position: "bottomCenter",
-        message: post.message,
-      });
-    } else {
-      let valuesUpdated = values;
-      valuesUpdated = {
-        imagem: {
-          value: "",
-          errorMessage: "",
-          hasError: false,
-        },
-        titulo: {
-          value: "",
-          errorMessage: "",
-          hasError: false,
-        },
-        conteudo: {
-          value: "",
-          errorMessage: "",
-          hasError: false,
-        },
-      };
-      setValues(valuesUpdated);
-      setDisableButton(true);
-
+    if (success) {
       iziToast.success({
         position: "bottomCenter",
-        message: "Postagem cadastrada com sucesso",
-        buttons: [
-          [
-            "<button><b>Ver postagem</b></button>",
-            (instance: IziToast, toast: HTMLDivElement) => {
-              instance.hide({ transitionOut: "fadeOut" }, toast, "button");
+        message: "Postagem atualizada com sucesso",
+      });
 
-              window.open(
-                `/postagens/${"id" in post && post.id}?from_dashboard=true`,
-                "_blank"
-              );
-            },
-            true,
-          ],
-        ],
+      navigate("/dashboard/postagens");
+    } else {
+      iziToast.error({
+        position: "bottomCenter",
+        message: "Erro ao atualizar postagem",
       });
     }
 
     setLoading(false);
   };
+
+  useEffect(() => {
+    getPost();
+  }, [location]);
 
   return (
     <div className="container">
@@ -292,7 +315,7 @@ export default function NovaPostagem() {
                   type="submit"
                   disabled={disableButton}
                 >
-                  Postar
+                  Atualizar
                 </button>
               ) : (
                 <button className="btn btn-warning" type="button" disabled>

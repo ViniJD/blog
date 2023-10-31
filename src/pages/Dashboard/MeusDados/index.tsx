@@ -1,6 +1,6 @@
 import iziToast from "izitoast";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   handleChangeValue as changeValue,
   handleSetError,
@@ -8,8 +8,12 @@ import {
 } from "../../../hooks/useForm";
 import { IForm, IFormValues } from "../../../interfaces/IFormControl";
 import { IUsuario } from "../../../interfaces/IUsuario";
-import { getItem, setItem } from "../../../services/localStorageService";
-import { updateUser } from "../../../services/usuarioService";
+import {
+  getItem,
+  removeItem,
+  setItem,
+} from "../../../services/localStorageService";
+import { deleteUser, updateUser } from "../../../services/usuarioService";
 import {
   minLengthValidator,
   requiredValidator,
@@ -22,6 +26,7 @@ export default function MeusDados() {
   const [loggedUser, setLoggedUser] = useState<IUsuario>(getItem("loggedUser"));
   const [loading, setLoading] = useState<boolean>(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const [values, setValues] = useState<IFormValues>({
     nome: {} as IForm,
     login: {} as IForm,
@@ -152,9 +157,8 @@ export default function MeusDados() {
         close: true,
         overlay: true,
         zindex: 999,
-        title: "Quer mudar seu nível?",
         message:
-          "Após essa mudança, você não poderá voltar para o nível de LEITOR. Tem certeza?",
+          "Quer mudar seu nível? Após essa mudança, você não poderá voltar para o nível de LEITOR. Tem certeza?",
         position: "center",
         buttons: [
           [
@@ -187,7 +191,7 @@ export default function MeusDados() {
       close: true,
       overlay: true,
       zindex: 999,
-      message: `Deseja realmente excluir sua conta? Todos as curtidas e comentários que você fez e que foram feitas nas suas postagens e também serão excluidas.`,
+      message: `Deseja realmente excluir sua conta? Todos as curtidas e comentários que você fez e que foram feitas nas suas postagens e também serão excluidas`,
       position: "center",
       buttons: [
         [
@@ -201,6 +205,23 @@ export default function MeusDados() {
           "<button>Sim</button>",
           async (instance, toast) => {
             instance.hide({ transitionOut: "fadeOut" }, toast, "button");
+            const success = await deleteUser(loggedUser.id);
+
+            if (success) {
+              iziToast.success({
+                position: "bottomCenter",
+                message:
+                  "Sua conta foi excluída com sucess. Vamos sentir sua falta",
+              });
+
+              removeItem("loggedUser");
+              navigate("/");
+            } else {
+              iziToast.error({
+                position: "bottomCenter",
+                message: "Erro ao excluir sua conta",
+              });
+            }
           },
           false,
         ],
@@ -211,14 +232,14 @@ export default function MeusDados() {
   const showWriterMessage = () => {
     iziToast.warning({
       position: "bottomCenter",
-      message: `O seu perfil é do nível ESCRITOR. Não é mais possível voltar para LEITOR.`,
+      message: `O seu perfil é do nível ESCRITOR. Não é mais possível voltar para LEITOR`,
     });
   };
 
   const showADMMessage = () => {
     iziToast.warning({
       position: "bottomCenter",
-      message: `O seu perfil é do nível ADMINISTRADOR. Você possui total controle sobre as postagens, curtidas, comentários e usuários. Além disso pode ter suas próprias postagens.`,
+      message: `O seu perfil é do nível ADMINISTRADOR. Você possui total controle sobre as postagens, curtidas, comentários e usuários. Além disso pode ter suas próprias postagens`,
     });
   };
 

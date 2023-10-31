@@ -22,6 +22,11 @@ export default function Sidebar({ children }: IProps) {
       role: ["ADM", "ESC"],
     },
     {
+      label: "Todos Usuários",
+      route: "/dashboard/usuarios",
+      role: ["ADM"],
+    },
+    {
       label: "Nova postagem",
       route: "/dashboard/postagens/nova",
       role: ["ADM", "ESC"],

@@ -65,6 +65,16 @@ const createPost = async (
   return data;
 };
 
+const updatePost = async (postData: IPostagem): Promise<boolean> => {
+  const { status } = await api.put(`/postagens/${postData.id}`, {
+    titulo: postData.titulo,
+    imagem: postData.imagem,
+    conteudo: postData.conteudo,
+  });
+
+  return status === 204;
+};
+
 export {
   getPosts,
   getPostsByAuthorId,
@@ -72,4 +82,5 @@ export {
   approveOrDisapprovePost,
   deletePost,
   createPost,
+  updatePost,
 };

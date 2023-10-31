@@ -28,6 +28,7 @@ import {
 } from "../../services/validators";
 
 export default function MostrarPostagem() {
+  const [fromDashboard, setFromDashboard] = useState<boolean>(false);
   const [disableButton, setDisableButton] = useState<boolean>(true);
   const [showLike, setShowLike] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -245,6 +246,10 @@ export default function MostrarPostagem() {
 
   useEffect(() => {
     setLoggedUser(getItem("loggedUser"));
+    const queryParams = location.search;
+    setFromDashboard(
+      queryParams.includes("from_dashboard") && queryParams.includes("true")
+    );
     getPostByAuthor();
   }, [location]);
 
@@ -261,165 +266,183 @@ export default function MostrarPostagem() {
 
   return (
     <main>
-      <img
-        src={post.imagem}
-        className="img-fluid"
-        alt={post.titulo}
-        style={{
-          maxHeight: 500,
-          width: "100%",
-          objectFit: "cover",
-        }}
-      />
-      <div className="container mt-5">
-        {post.ativo === 0 && (
-          <div className="alert alert-warning fw-bold">
-            <i className="fa-solid fa-triangle-exclamation"></i> Essa postagem
-            ainda não foi aprovada, por isso não pode ser comentada ou curtida
-          </div>
-        )}
-        <h1 className="display-5 fw-bold">{post.titulo}</h1>
-        <p>
-          escrito por{" "}
-          <Link
-            to={`/postagens/usuario/${post.idUsuarioFk}`}
-            className="text-dark fw-bold"
-          >
-            {post.escritor?.nome}
-          </Link>
-        </p>
-        <p
-          className="fs-4"
-          dangerouslySetInnerHTML={{
-            __html: post.conteudo,
-          }}
-        />
-        <div className="row">
-          <div className="col-8">
-            {!loggedUser || post.ativo === 0 ? (
-              <div
-                className="container mt-5 z-3 position-absolute rounded-3 bg-secondary opacity-0"
-                style={{
-                  height: 152,
-                  cursor: "pointer",
-                }}
-                onClick={
-                  !loggedUser || post.ativo === 0
-                    ? () => showUnloggedOrInactiveAlert()
-                    : () => {}
-                }
-              ></div>
-            ) : (
-              <></>
+      {post.ativo === 1 || fromDashboard ? (
+        <>
+          <img
+            src={post.imagem}
+            className="img-fluid"
+            alt={post.titulo}
+            style={{
+              maxHeight: 500,
+              width: "100%",
+              objectFit: "cover",
+            }}
+          />
+          <div className="container mt-5">
+            {post.ativo === 0 && (
+              <div className="alert alert-warning fw-bold">
+                <i className="fa-solid fa-triangle-exclamation"></i> Essa
+                postagem ainda não foi aprovada, por isso não pode ser comentada
+                ou curtida
+              </div>
             )}
-
-            <form autoComplete="off" onSubmit={handleSubmit}>
-              <label htmlFor="conteudo" className="form-label fs-3 fw-bold">
-                Comentários
-              </label>
-              <textarea
-                className={`form-control ${
-                  values.conteudo.hasError ? "is-invalid" : ""
-                }`}
-                placeholder="Digite seu comentário"
-                id="conteudo"
-                name="conteudo"
-                rows={3}
-                maxLength={250}
-                disabled={!loggedUser && true}
-                value={values.conteudo ? values.conteudo.value : ""}
-                onChange={handleChangeValue}
-                onBlur={handleVerifyIfHasError}
-              />
-              {values.conteudo.hasError && (
-                <div className="invalid-feedback">
-                  {values.conteudo.errorMessage}
-                </div>
-              )}
-              <div className="form-text">
-                {values.conteudo && values.conteudo.value
-                  ? values.conteudo.value.length
-                  : "0"}{" "}
-                caracteres de 250.
-              </div>
-
-              <div className="text-end">
-                {!loading ? (
-                  <button
-                    type="submit"
-                    className="btn btn-warning mb-3"
-                    disabled={(!loggedUser && true) || disableButton}
-                  >
-                    Enviar
-                  </button>
-                ) : (
-                  <button className="btn btn-warning" type="button" disabled>
-                    <span className="spinner-border text-dark spinner-border-sm"></span>
-                  </button>
-                )}
-              </div>
-            </form>
-
-            {post.comentarios?.map((comentario, idx) => (
-              <div key={comentario.id}>
-                <div className="col-10 offset-1 d-flex justify-content-between align-items-center">
-                  <span
-                    className={
-                      loggedUser && loggedUser?.id === comentario.idUsuarioFk
-                        ? "me-4"
-                        : ""
+            <h1 className="display-5 fw-bold">{post.titulo}</h1>
+            <p>
+              escrito por{" "}
+              <Link
+                to={`/postagens/usuario/${post.idUsuarioFk}`}
+                className="text-dark fw-bold"
+              >
+                {post.escritor?.nome}
+              </Link>
+            </p>
+            <p
+              className="fs-4"
+              dangerouslySetInnerHTML={{
+                __html: post.conteudo,
+              }}
+            />
+            <div className="row">
+              <div className="col-8">
+                {!loggedUser || post.ativo === 0 ? (
+                  <div
+                    className="container mt-5 z-3 position-absolute rounded-3 bg-secondary opacity-0"
+                    style={{
+                      height: 152,
+                      cursor: "pointer",
+                    }}
+                    onClick={
+                      !loggedUser || post.ativo === 0
+                        ? () => showUnloggedOrInactiveAlert()
+                        : () => {}
                     }
-                  >
-                    <strong className="me-1">{comentario.usuario?.nome}</strong>
-                    {comentario.conteudo}
-                  </span>
-                  {loggedUser && loggedUser?.id === comentario.idUsuarioFk && (
-                    <span
-                      style={{ cursor: "pointer" }}
-                      onClick={() => handleDeleteComment(comentario.id)}
-                    >
-                      <i className="fa-regular fa-trash-can"></i>
-                    </span>
+                  ></div>
+                ) : (
+                  <></>
+                )}
+
+                <form autoComplete="off" onSubmit={handleSubmit}>
+                  <label htmlFor="conteudo" className="form-label fs-3 fw-bold">
+                    Comentários
+                  </label>
+                  <textarea
+                    className={`form-control ${
+                      values.conteudo.hasError ? "is-invalid" : ""
+                    }`}
+                    placeholder="Digite seu comentário"
+                    id="conteudo"
+                    name="conteudo"
+                    rows={3}
+                    maxLength={250}
+                    disabled={!loggedUser && true}
+                    value={values.conteudo ? values.conteudo.value : ""}
+                    onChange={handleChangeValue}
+                    onBlur={handleVerifyIfHasError}
+                  />
+                  {values.conteudo.hasError && (
+                    <div className="invalid-feedback">
+                      {values.conteudo.errorMessage}
+                    </div>
                   )}
-                </div>
-                <>
-                  {post.comentarios && post.comentarios?.length > idx + 1 ? (
-                    <hr className="col-10 offset-1" />
-                  ) : (
-                    <></>
-                  )}
-                </>
+                  <div className="form-text">
+                    {values.conteudo && values.conteudo.value
+                      ? values.conteudo.value.length
+                      : "0"}{" "}
+                    caracteres de 250.
+                  </div>
+
+                  <div className="text-end">
+                    {!loading ? (
+                      <button
+                        type="submit"
+                        className="btn btn-warning mb-3"
+                        disabled={(!loggedUser && true) || disableButton}
+                      >
+                        Enviar
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-warning"
+                        type="button"
+                        disabled
+                      >
+                        <span className="spinner-border text-dark spinner-border-sm"></span>
+                      </button>
+                    )}
+                  </div>
+                </form>
+
+                {post.comentarios?.map((comentario, idx) => (
+                  <div key={comentario.id}>
+                    <div className="col-10 offset-1 d-flex justify-content-between align-items-center">
+                      <span
+                        className={
+                          loggedUser &&
+                          loggedUser?.id === comentario.idUsuarioFk
+                            ? "me-4"
+                            : ""
+                        }
+                      >
+                        <strong className="me-1">
+                          {comentario.usuario?.nome}
+                        </strong>
+                        {comentario.conteudo}
+                      </span>
+                      {loggedUser &&
+                        loggedUser?.id === comentario.idUsuarioFk && (
+                          <span
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleDeleteComment(comentario.id)}
+                          >
+                            <i className="fa-regular fa-trash-can"></i>
+                          </span>
+                        )}
+                    </div>
+                    <>
+                      {post.comentarios &&
+                      post.comentarios?.length > idx + 1 ? (
+                        <hr className="col-10 offset-1" />
+                      ) : (
+                        <></>
+                      )}
+                    </>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="col-4 d-flex justify-content-center mt-4 pt-5">
-            <span
-              className={`${!loggedUser && "opacity-75"} position-absolute`}
-              style={{ cursor: "pointer" }}
-              onClick={handleLikeOrDislike}
-            >
-              <>
-                {showLike === true && (
-                  <span>
-                    <i className={`fa-solid fa-heart fa-2xl`}></i>
+              <div className="col-4 d-flex justify-content-center mt-4 pt-5">
+                <span
+                  className={`${!loggedUser && "opacity-75"} position-absolute`}
+                  style={{ cursor: "pointer" }}
+                  onClick={handleLikeOrDislike}
+                >
+                  <>
+                    {showLike === true && (
+                      <span>
+                        <i className={`fa-solid fa-heart fa-2xl`}></i>
+                      </span>
+                    )}
+                    {showLike === false && (
+                      <span>
+                        <i className={`fa-regular fa-heart fa-2xl`}></i>
+                      </span>
+                    )}
+                  </>
+                  <span className="fs-5 ms-3 user-select-none">
+                    {post.curtidas?.length} curtidas
                   </span>
-                )}
-                {showLike === false && (
-                  <span>
-                    <i className={`fa-regular fa-heart fa-2xl`}></i>
-                  </span>
-                )}
-              </>
-              <span className="fs-5 ms-3 user-select-none">
-                {post.curtidas?.length} curtidas
-              </span>
-            </span>
+                </span>
+              </div>
+            </div>
+            <footer className="pt-3 my-4 text-body-secondary border-top">
+              PI 2 • 2023
+            </footer>
           </div>
+        </>
+      ) : (
+        <div className="container mt-5">
+          <h1 className="display-5 fw-bold mb-5">Postagem não encontrada</h1>
         </div>
-        <footer className="pt-3 my-4 text-body-secondary border-top">
-          PI 2 • 2023
-        </footer>
-      </div>
+      )}
     </main>
   );
 }

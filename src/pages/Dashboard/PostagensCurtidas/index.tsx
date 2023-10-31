@@ -1,20 +1,45 @@
 import { Link, useLocation } from "react-router-dom";
-import CardPostagem from "../../../components/CardPostagem";
 import { useEffect, useState } from "react";
 import { ICurtida } from "../../../interfaces/ICurtida";
 import { IUsuario } from "../../../interfaces/IUsuario";
 import { getItem } from "../../../services/localStorageService";
 import { deleteLike, getLikesByUserId } from "../../../services/curtidaService";
 import iziToast from "izitoast";
+import { getPostById } from "../../../services/postagemService";
+import { IPostagem } from "../../../interfaces/IPostagem";
+
+interface IPostagemECurtida {
+  post: IPostagem;
+  like: ICurtida;
+}
 
 export default function PostagensCurtidas() {
-  const [likes, setLikes] = useState<ICurtida[]>([]);
+  const [postsAndLikes, setPostsAndLikes] = useState<IPostagemECurtida[]>([]);
   const [loggedUser] = useState<IUsuario>(getItem("loggedUser"));
   const location = useLocation();
 
   const getLikesById = async () => {
     const likesResponse = await getLikesByUserId(loggedUser.id);
-    setLikes(likesResponse);
+    const postIds = likesResponse.map((lk) => lk.idPostagemFk);
+
+    if (postIds.length > 0) {
+      const postsResponse = await getPostById(postIds);
+
+      const postAndLike = likesResponse.map((like) => {
+        const post = postsResponse.find(
+          (post) => post.id === like.idPostagemFk
+        ) as IPostagem;
+
+        return {
+          like,
+          post,
+        };
+      });
+
+      setPostsAndLikes(postAndLike);
+    } else {
+      setPostsAndLikes([]);
+    }
   };
 
   const handleLikeOrDislike = async (id: number) => {
@@ -67,25 +92,26 @@ export default function PostagensCurtidas() {
     <>
       <h1 className="display-5 fw-bold mb-5">Postagens curtidas</h1>
       <div className="row">
-        {likes.length > 0 ? (
-          likes.map((like) => (
-            <div className="col-4 mb-4" key={like.id}>
+        {postsAndLikes.length > 0 ? (
+          postsAndLikes.map((pl) => (
+            <div className="col-4 mb-4" key={pl.like.id}>
               <div className="card">
                 <div className="card-body">
-                  <p>
+                  <p className="d-flex alig-items-center justify-content-between">
                     <Link
-                      to={`/postagens/${like.idPostagemFk}`}
+                      to={`/postagens/${pl.like.idPostagemFk}`}
                       target="_blank"
                       className="text-dark fw-bold"
                     >
-                      Ver postagem
+                      {pl.post.titulo}
                     </Link>
                   </p>
+                  <span className={`fa-solid fa-heart fa-2xl`}></span>
                 </div>
                 <div className="card-footer text-muted">
                   <button
                     className="btn btn-outline-danger me-1"
-                    onClick={() => handleLikeOrDislike(like.id)}
+                    onClick={() => handleLikeOrDislike(pl.like.id)}
                   >
                     <i className="fa-regular fa-trash-can"></i>
                   </button>

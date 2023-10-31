@@ -38,7 +38,10 @@ export default function CardPostagem({
           <Link
             className="btn btn-warning ms-auto"
             target={openLinksWithTargetBlank ? "_blank" : "_self"}
-            to={`/postagens/${post.id}`}
+            to={{
+              pathname: `/postagens/${post.id}`,
+              search: openLinksWithTargetBlank ? `?from_dashboard=true` : ``,
+            }}
           >
             Ver postagem
           </Link>
